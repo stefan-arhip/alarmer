@@ -1,0 +1,577 @@
+object MainForm: TMainForm
+  Left = 283
+  Height = 401
+  Top = 125
+  Width = 741
+  Caption = 'Alarmer'
+  ClientHeight = 401
+  ClientWidth = 741
+  OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
+  OnShow = FormShow
+  SessionProperties = 'ChangeApplicationIconIfAnAlarmIsPassed.Checked;DisplayIconsOnTabs.Checked;DisplayMessageOfNextAlarmInTaskbar.Checked;DisplayNextAlarmAsTaskbarIcon.Checked;DisplayRemainingTimeOfNextAlarmInTaskbar.Checked;DisplayToolbar.Checked;FileToOpenInAlarm.Text;Height;Left;lvAlarms.Columns;seSecondsToDisplayMessage.Value;ShortTimeFormat.Checked;Top;Width;ShowConfirmationDialogs.Checked'
+  LCLVersion = '3.0.0.3'
+  object PageControl1: TPageControl
+    Left = 0
+    Height = 378
+    Top = 0
+    Width = 741
+    ActivePage = TabSheet1
+    Align = alClient
+    TabIndex = 0
+    TabOrder = 0
+    object TabSheet1: TTabSheet
+      Caption = 'ALARMS'
+      ClientHeight = 350
+      ClientWidth = 733
+      ImageIndex = 2
+      object lvAlarms: TListView
+        Left = 0
+        Height = 306
+        Top = 44
+        Width = 733
+        Align = alClient
+        Columns = <        
+          item
+            Caption = 'Pos'
+            Width = 60
+          end        
+          item
+            Caption = 'Active'
+            Width = 60
+          end        
+          item
+            Caption = 'Start time'
+            Width = 125
+          end        
+          item
+            Caption = 'Stop time'
+            Width = 125
+          end        
+          item
+            Alignment = taRightJustify
+            Caption = 'Length'
+            Width = 75
+          end        
+          item
+            Alignment = taRightJustify
+            Caption = 'Remaining'
+            Width = 100
+          end        
+          item
+            Caption = 'Message'
+            Width = 188
+          end>
+        HideSelection = False
+        PopupMenu = pmAlarms
+        ReadOnly = True
+        RowSelect = True
+        ScrollBars = ssAutoBoth
+        SortColumn = 0
+        SortType = stBoth
+        TabOrder = 0
+        ViewStyle = vsReport
+        OnAdvancedCustomDrawItem = lvAlarmsAdvancedCustomDrawItem
+        OnDblClick = lvAlarmsDblClick
+        OnSelectItem = lvAlarmsSelectItem
+      end
+      object tbMain: TToolBar
+        Left = 0
+        Height = 44
+        Top = 0
+        Width = 733
+        AutoSize = True
+        ButtonHeight = 42
+        ButtonWidth = 60
+        Caption = 'tbMain'
+        Images = ImageList1
+        ShowCaptions = True
+        TabOrder = 1
+        object tbAdd: TToolButton
+          Left = 1
+          Top = 2
+          Caption = 'Add'
+          ImageIndex = 0
+          OnClick = tbAddClick
+        end
+        object tbEdit: TToolButton
+          Left = 61
+          Top = 2
+          Caption = 'Edit'
+          Enabled = False
+          ImageIndex = 1
+          OnClick = tbEditClick
+        end
+        object tbTest: TToolButton
+          Left = 181
+          Top = 2
+          Caption = 'Test'
+          Enabled = False
+          ImageIndex = 2
+          OnClick = tbTestClick
+        end
+        object tbInactive: TToolButton
+          Left = 241
+          Top = 2
+          Caption = 'Activate'
+          Enabled = False
+          ImageIndex = 3
+          OnClick = tbInactiveClick
+        end
+        object tbRemove: TToolButton
+          Left = 301
+          Top = 2
+          Caption = 'Delete'
+          Enabled = False
+          ImageIndex = 4
+          OnClick = tbRemoveClick
+        end
+        object tbPurge: TToolButton
+          Left = 361
+          Top = 2
+          Caption = 'Purge'
+          ImageIndex = 10
+          OnClick = tbPurgeClick
+        end
+        object tbRestart: TToolButton
+          Left = 121
+          Top = 2
+          Caption = 'Restart'
+          Enabled = False
+          ImageIndex = 11
+          OnClick = tbRestartClick
+        end
+      end
+    end
+    object TabSheet2: TTabSheet
+      Caption = 'SETTINGS'
+      ClientHeight = 350
+      ClientWidth = 733
+      ImageIndex = 8
+      object laFileToOpenOnAlarm: TLabel
+        Left = 15
+        Height = 15
+        Top = 15
+        Width = 112
+        Caption = 'File to open on alarm'
+        ParentColor = False
+      end
+      object FileToOpenInAlarm: TEdit
+        Left = 12
+        Height = 23
+        Top = 31
+        Width = 672
+        Anchors = [akTop, akLeft, akRight]
+        ReadOnly = True
+        TabOrder = 0
+      end
+      object SelectFile: TButton
+        Left = 692
+        Height = 25
+        Top = 31
+        Width = 24
+        Anchors = [akTop, akRight]
+        Caption = '...'
+        TabOrder = 1
+        OnClick = SelectFileClick
+      end
+      object ShowConfirmationDialogs: TCheckBox
+        Left = 12
+        Height = 19
+        Top = 70
+        Width = 160
+        Caption = 'Show confirmation dialogs'
+        Checked = True
+        State = cbChecked
+        TabOrder = 2
+      end
+      object DisplayRemainingTimeOfNextAlarmInTaskbar: TCheckBox
+        Left = 12
+        Height = 19
+        Top = 90
+        Width = 267
+        Caption = 'Display remaining time of next alarm in taskbar'
+        Checked = True
+        State = cbChecked
+        TabOrder = 3
+        OnChange = DisplayRemainingTimeOfNextAlarmInTaskbarChange
+      end
+      object DisplayToolbar: TCheckBox
+        Left = 12
+        Height = 19
+        Top = 200
+        Width = 97
+        Caption = 'Display toolbar'
+        Checked = True
+        State = cbChecked
+        TabOrder = 7
+        OnChange = DisplayToolbarChange
+      end
+      object DisplayMessageOfNextAlarmInTaskbar: TCheckBox
+        Left = 44
+        Height = 19
+        Top = 110
+        Width = 232
+        Caption = 'Display message of next alarm in taskbar'
+        Checked = True
+        State = cbChecked
+        TabOrder = 4
+      end
+      object DisplayIconsOnTabs: TCheckBox
+        Left = 12
+        Height = 19
+        Top = 220
+        Width = 129
+        Caption = 'Display icons on tabs'
+        TabOrder = 8
+        OnChange = DisplayIconsOnTabsChange
+      end
+      object ChangeApplicationIconIfAnAlarmIsPassed: TCheckBox
+        Left = 44
+        Height = 19
+        Top = 130
+        Width = 264
+        Caption = 'Change application''s icon if an alarm is passed'
+        TabOrder = 5
+      end
+      object laSecondsToDisplayMessage: TLabel
+        Left = 12
+        Height = 15
+        Top = 272
+        Width = 147
+        Caption = 'Seconds to display message'
+        ParentColor = False
+      end
+      object seSecondsToDisplayMessage: TSpinEdit
+        Left = 12
+        Height = 23
+        Top = 291
+        Width = 84
+        MaxValue = 60
+        TabOrder = 9
+        Value = 10
+      end
+      object ShortTimeFormat: TCheckBox
+        Left = 44
+        Height = 19
+        Top = 170
+        Width = 206
+        Caption = 'Display short time format in taskbar'
+        TabOrder = 6
+      end
+      object DisplayNextAlarmAsTaskbarIcon: TCheckBox
+        Left = 44
+        Height = 19
+        Top = 150
+        Width = 196
+        Caption = 'Display next alarm as taskbar icon'
+        TabOrder = 10
+      end
+      object Shape1: TShape
+        Left = 213
+        Height = 71
+        Top = 249
+        Width = 92
+        Pen.Color = clWhite
+        Pen.Width = 0
+      end
+    end
+    object TabSheet3: TTabSheet
+      Caption = 'HELP'
+      ClientHeight = 350
+      ClientWidth = 733
+      ImageIndex = 9
+      object meHistory: TMemo
+        Left = 4
+        Height = 341
+        Top = 8
+        Width = 726
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        Lines.Strings = (
+          '2024-01-05'
+          '* Code published on github'
+          ''
+          '2019-12-04'
+          '* Max value for hours is now set to 999999'
+          '* Icon in taskbar display hours/minutes/seconds to next alarm'
+          ''
+          '2017-07-10'
+          '* Remove icon from tray'
+          '* Increase size of spinedit fields'
+          '* Max value for hours is now set to 9999'
+          '* Usage table is keeping only a row'
+          '* Compiled in 32 / 64-bit for Windows (x32-sqlite3.dll / x64-sqlite3.dll)'
+          ''
+          '2015-07-23'
+          '* Alarms is saved on add/edit into sql file directly, not on quit application'
+          '* Renamed table tAlarms to Events and add history table, Usage'
+          '* Launching another instance of application will warn user'
+          '* Settings are loaded/saved thru IniPropStorage, instead of TIniFile'
+          '* Max value for hours is now set to 999'
+          ''
+          '2013-06-13'
+          '* Alarms is saved into sqlite database'
+          ''
+          '2013-04-16'
+          '* Added icons in tabs'
+          '* Option to display or not the message of next alarm in taskbar'
+          '* Open correctly in Linux the file to open on alarm, even if file is in application folder'
+          '* Display remaining time of next alarm in taskbar in Linux'
+          ''
+          '2012-12-26'
+          '* Display remaining time of next alarm in taskbar'
+          '* Toolbar could be hidden'
+          '* File to open on alarm is opened relatively to app path'
+          '* Alarm list could be sorted by any column'
+          '* Minimize to tray on close'
+        )
+        ReadOnly = True
+        ScrollBars = ssAutoBoth
+        TabOrder = 0
+      end
+    end
+  end
+  object sbMain: TStatusBar
+    Left = 0
+    Height = 23
+    Top = 378
+    Width = 741
+    Panels = <    
+      item
+        Text = '0 active alarms'
+        Width = 120
+      end    
+      item
+        Text = '0 inactive alarms'
+        Width = 120
+      end>
+    SimplePanel = False
+  end
+  object IniPropStorage1: TIniPropStorage
+    StoredValues = <>
+    IniFileName = 'settings.ini'
+    IniSection = 'Alarmer'
+    Left = 672
+    Top = 88
+  end
+  object Con: TSQLite3Connection
+    Connected = False
+    LoginPrompt = False
+    KeepConnection = False
+    Transaction = Tr
+    LogEvents = []
+    AlwaysUseBigint = False
+    Left = 672
+    Top = 176
+  end
+  object Tr: TSQLTransaction
+    Active = False
+    Action = caNone
+    Database = Con
+    Left = 672
+    Top = 232
+  end
+  object sql: TSQLQuery
+    FieldDefs = <>
+    Database = Con
+    Transaction = Tr
+    Params = <>
+    Macros = <>
+    Left = 672
+    Top = 288
+  end
+  object ImageList2: TImageList
+    Height = 32
+    Width = 32
+    Left = 536
+    Top = 352
+    Bitmap = {
+      4C7A020000002000000020000000270400000000000078DAC5974B4B5B4114C7
+      C5BAE9C6222E7C817BD1952B3F8545E92710115DDA5D0B3E4090F87EBF03A588
+      44B46A2C053159988DA5886D8C847691F8A8D454D14449D45A6D727AFFD35CB5
+      7AE39DB9992407FE30B933737E93799E9396766BA3A3A3E98AEA15CD2AB22B5A
+      96247BD4277CA7A76998F2BD4A1125495577D9636363C964FF3706859D9E02B6
+      2AB05F1AE93B3232428383834C281BE483FD4EA4CFF0F03075747430592C1626
+      F537EA04F9738A6CBCED878686A8ABAB8BF6F7F7E9BE1D1C1C504F4F0F9B0F01
+      BE2D7A3EB8FE777B7B3BE919C627300FCBBCFCCECE4EDADADAD2E5631EDADADA
+      A4F2F17F30B7BC363E3ECED64A16BFAFAF8F1C0E0737DFE974B2F1CAE263EEF7
+      F6F6B8F9C16090ED15597C93C944E1709844ACB5B595E75ED0E5C307CEB6A899
+      CD669E3DA0CBEFEFEFA7F9F97961BECD6663FB265E3ECED2F6F6B6301F7714C7
+      397C948FF12BEF1319B58181012623FCEEEE6E7697C66B988347D641938FF3B6
+      B4B444B20CFB07F7320F1FFBCD6EB7936C834FF8D6E3E3AEC5B9916DF0A9F12E
+      69CE7F6F6F2FCDCECE4A63C3177C8AEC3FCC15EE3DABD54A2E978B9DA7402040
+      A15088E9F4F494FC7E3F13CAEA77B4415BF4415FF8D09877AEF387BB0F7D7116
+      B02771A7373434506363233535355173733313CAF8863AB4415BF4415F9D3B78
+      5924FE80229108F97C3E7627793C1E1613ECECECB06FA853DB09BCFF36DE7813
+      73A9676823108FDA44E24FCC27D63496A1EE91B58E157F0AC5DFD8C76A3CB2B9
+      B9C98432BEC5D8E38FC6DF4AAC249C7F607DC1C31E835036107B939A0B4E4C4C
+      A42CFF522D996340BEA9950347D7A23EBA276D12F36F759FD723DF4C8B69EBF9
+      8A5E295A50B422590B51DFF931D8758ACE15518275F18FF5801D49025B55E476
+      0C6CCECF93C856751E65BF4E015B15D856237D3333BF5059D93726940DF217A3
+      7B93BB4F6EEE06CDCC04E8FA3A7273EFA33C3717A0820297287F45849F9DED24
+      AFF732E6FBF3FDFB6FCACB73258C6F361FE9BEBF0B0B2709E163DEAFAE22BA7C
+      C420C5C56EE9FCDADA5DEE78B3A5C5279D3F3DEDE7E67FFC1892CEF7787E71F3
+      2F2EC29491218FFFEC9993C2E18850CC5F52E296C62F2FF708E71CD5D5BBD2F8
+      9393C7C2FCC5C51329FCD2D2AF5CE7EEBEE14E2C2A72C7C5C71AFEF8F1DB70DE
+      E7765F504ECE86217E55D50E05837FE2CE3D7DBE2BAAA8F00AF12B2BBDD2F3EF
+      1863D0E417166ED2E565581A1BBEE05364FE71E60E0FAFE266C3077C19D97F4F
+      9F7EA6E7CF3D4A4EFD93BDEF0E47903E7D3AA3B5B5335A5D0DB1DF10CAF8863A
+      FC465BF401173E64BDBF0990103F2BCBC9FEEB870FA73435E5A7376F8EE8EDDB
+      63B258FCF4FEFD09AB439B44F19F3C59A7E3E3EB986B8D3AB411E40BC59F2F5E
+      78D9FBA6F5E6A1CE40FC291C7F23C6ABA9D92593E92713CA8271DFDDF83BC5F9
+      C74DFE956C7E5D8AF2CFF387EC07F9B73501F9B7552BFFFE0BEE34C91B
+    }
+  end
+  object OpenDialog1: TOpenDialog
+    Left = 536
+    Top = 288
+  end
+  object Timer1: TTimer
+    OnTimer = Timer1Timer
+    Left = 464
+    Top = 288
+  end
+  object ImageList1: TImageList
+    Left = 472
+    Top = 352
+    Bitmap = {
+      4C7A0C0000001000000010000000200B00000000000078DAED9A0B50935716C7
+      3FB50F6C6D955A5AA5C853E41940405EA2205AB594A582EDB4CB5AAD4BB7AE45
+      D196D16D0B5DD70A6A6761EB686ADD8AC5290F158C94028A55147944AAC8BA8B
+      0D8A8608128328600821C82367EFB9F085F825C1809DD9DD59EECC7FEE77CF3D
+      BF73CFB9F77E093384611E6E69510C688B1961434659154F355A5E5EF111D568
+      79D98977A98CE1B9F5A2A43FBE49A56F4E1FDF90B3C42819E2C5998146C910CF
+      55ED7E772A63F2D717EF5F7B6CA946BBFFD5C96654A3E52F2499508D967F9CFB
+      3BD6745BD06E06588D949D9FC280D3A98FA8E6258F8C0F4C648057B04AA391AC
+      3F770B031EC7C235C2B1B16CC06606BCB37C35C2B1B1ECBD331F825F2C037E07
+      670D28D678B6313712D43D0A2ADF3F3254C6B275E941D0D356ABD1D5EF7C8D66
+      6BF63A83AAA148231C1BCB3E5BD802CFE5CBA83A7FD90F17BF341BD1194FCFBA
+      0A2BA47D807DD9E7E3477CBF667E7D1E588DBDA9236F0030C15AA8AC35AF54CA
+      CD85CABB9E21E2DB0EBC1B0A678FEB72F78562A99950D9F17C5967B769B9B241
+      1F3FEB9858B4FCDA83FE8C8E7E987EE43ADC6AEA81BE3E003919DF92F68045CE
+      0D38449EDFBAD6DD672F105FE0F22EC76E4823AEF5C0F2BA1E70FCEA1C701BDA
+      700EF5F2A13A9D3376DF532667CABA1F62CB12189D18AC0F97B79D755C675D2E
+      CFC6405F9DFA9D8B3AA49266E857B56A84BCF6989513AFE8AA4EFDEE279B1BAE
+      4B75786DB17667B793222EEFE85A24BE525543DEF9AB54E8CF3E73E5E05224D0
+      B3FEAB4BC3CA248F6249EE0A527F88CEFDE9534D08989B5DE5ED95A156492BA0
+      FBB6AE1C9DBE577B7A659501A8C77179754FD74CE5956FF2CF6CB5EE0D5D90DC
+      D7D5F430CB73E18330C553A16E3EFD2DA8D5CF70F97EE59DC0DB85BF03E15613
+      F8F9AF56B23973D2241EEEFBDBDCDDF6CB67CF4E6DBD986C79FBC2972F76A20F
+      F4F74E1B7BE3F5B719F675A0ADD1B011EF35C18ED4F611C7605996C79ECB0F17
+      CF106F6C4D8678CE58FD983C18BBF7DCFD3486379493313C336D033C2AAF610F
+      D0006F74FB4FF363ED7FB74D94C088A487CF3FDE61940CF17FDB7DCF2819E257
+      BEDF64940CF18F55FF581B6B83CDD2BE068CB119622DEDAF80B6BF3EDB70ECFB
+      6BDB34FEFA6CFA58DB5927347EAC06FC756DE83B5C8CD7231AF46A38563B068A
+      CBB2F647ED1FEB378B77FD2119C31B628D89E1E0F0773AF78A9D4823B4A1B46D
+      E883364331587FF6599F6DB81AB499E16C8F8A618C6DAC8DB5B136B2E69A1E47
+      DF23ABD40F278C86DD7AEB34B03146C3CEBFB26FC43158962B6363A09F218DDD
+      88B1F6FFF0CE3FCEFD277EEAC779FF0663F48FF6FDE7C6789CF776B0EE71A3F9
+      FCFB6F6E2DED7775646D6DFD82FD2C7B70747404ECC9789A3E3F00D03C5B595B
+      F1AC6DACD3483FF9ADB7DF0A9AE3330702E70502F6EFFCF69D30629F3438EFC1
+      E5497C0F175797369E1B0F487FF3B5D0D7BE9B377F1EBCBAF855C03EFC8DF034
+      6217E3BCABAB6B1BF1E769F37303E7E6F9F8F8D0F5FCFCFDC0D7CF1782828260
+      E1A285B4C7310AE7D1CF3FC0BF509BBF26AECB5CFEE672085E100C41C141303F
+      683E7D5E10B280F638463B3E47444680A8AE3687E52D2C2CA685FD262C28614B
+      423BE68A7E6F44BC01054585206EACA73D8ED18EF3F19F27C897452E5B801CF2
+      363636E0E8E4089E9E9E103037808A307749FC70A217B0FF213FEF1E3BE7E9E5
+      49FD91439EEC0B78797BD17DC6DABDE77843D5E54BE1DAE774BAA4380AED388F
+      7EE88F1CF2EE1EEE9AFD4179CCF6003F3FBF87F89045215168D7F6430E79C92D
+      0994FF5C0189DB13695CB43BBB38DF993E7DFA5264B1276BB5A01DE7B77FB99D
+      FA2337B8FF937F3AF3531039C336F44139393BD1FA6658CE001B5B1B3A66E7FC
+      E706B4A23F72ECF9D9CDB4CB74707400377737EA83F784E44039EC718C769C47
+      3F3B3BBB4CEDF3CFCDFFE1471F5F1F70E5B9C292A54B206967127DA6F78DF4DB
+      92B6513B3EA31FFA73EEBF5749F939F9FA8DB1206EA8171FFB31F73B3C23DC63
+      EC330F6765489A6E8A711EFDD09FFBFE0CDABEC7BA72F3738366DACFA4F9637F
+      F8E89130629F3438EFA5EFFDE308EF0D68C9E0FB4BFFC3FC2B4A565F0DA2E24C
+      9015268328331E44A931A44F846AB491B9E1D87AA180322A9110542AD9D03FDF
+      542A9055178230350E44C24230C4D6933528477810240224460E883CD398ED32
+      10090672D1C919D74596CC415C0840219FAE3BB03EB1F3A34185F1490C617234
+      88AA859A18582FC6079223C41396E4499B309372B427B154644E467C31D76201
+      7F8827FE746DCC19D7C69C71FD98D9A08AB101157F209E8CD845646DF44D4D8C
+      1AE293A306D6438E30AC54D1C80EF8637EC2481B288CA29F1B901CE53FC42786
+      0EF0B8F62027237EAAE4C8817549CE42322E0C9DA29F473FAC8FD4819C46580F
+      69A2C829032CE985F191740FF931911A5E48F602F3C333464E48FC9011917A30
+      066507857B8D7780CF8F1F5A9F9C05DE0D8CCBFA630C19898B8D65591F41620C
+      1417173F7407300764690CAC97E4496B26C2FDA9A7F7B79E1C4B1C64A6F2F5DE
+      413C53BC1B78BE1847737DF1DE911C05C3B09A3C84C520488D874C7216B8C7B8
+      4FA97144C9713A39FF2A32A2D9DB6F66FCFC2ABE7170A8E836373F47BE83CFB7
+      07045433A1A1B58F645F7A29987170389EE3E3F30F888D6D8194942E888E6E02
+      67E74AF0F7AFA63E2B57AED4E156AC5831F864C2B8BB57C1DAB5AD2091F4C327
+      9F74C2C58B7DF0F6DB8DE0E050D9CEFA37343408C856CB514D4D4D3968934AA5
+      F5870F9FE8B4B1B944D656404C8C02BABAD4B0660D3ECBE1E597877E0FD0D6D6
+      56B26EDD3A40C9E5F262B4353636B667671781A565158486DE0385420DEFBEDB
+      01972FF7C1A24552B0B028EF66F9D6D6D673D9D9D980BA7FFFFE59B4913C9445
+      456760C99212707111C1BC792D101E7E1F020365E46FAA0B606B5BBA97E577EF
+      DEFD97F4F4F462149FCFA7B6B8B838262CECF5743BBB90FC279FE48BA74EADEC
+      7BF1C52A3033ABE83737CFCF3633FB48B35FF5F5F5F9A4866E14D98B3CB42914
+      0AC99D3B7714D5D597BA8E1F2FEE15084E415EDE593878304FC8DD6FAC7FFDFA
+      F58062EB572A95EDBDBDBDD0D9D90977EFDE85E6E66668696921F55F3EC7E5F5
+      D54FD6573E78F000503D3D3D1ADDB871A394CBEBAB3F212181898D8DDDBB61C3
+      068D366EDCF835E975EE8BA1FA490D1D1C292412C93163EBD7CE1B85FB515757
+      57325CFD843FC3D6DFDDDD0D5C11BE8CE5BCBDBD699F9696F6554141C1CFA803
+      070EEC41DB9E3D7BBE4A494939C86AD7AE5DA9649FBEDDB9732765828383192F
+      2F2F86C7E3316E6E6E0CF9DB98CAC3C383CAD6D696B1B4B4A4B2B2B262A64E9D
+      CA989A9A323366CCA01CAE5DF2E9D0A740C967E343CEC54FB8559A30A111ED25
+      9F8D6B217D06DA0DBDDFE857FAB989BCFC8BC917CBB73DDF765310D9D75EB611
+      EE576C82FB651FAB1B72233B087FCF508CD39B18683DBB0EC4598B698F92642F
+      A362C7378F2E83D284A7A4FA629CFC9881E613ABA830068E4FC68D83539B9E80
+      D23F3F0FD73316D3B9DA03BE706AF3D3C55CBE309681C6DC088D4A3E1D07FDD2
+      02C7E6B2245EDDB155D9DAF33FFD69CA2D2E9F17C380B6F2D78F87E22D16B701
+      FA9F217ABA68B36947CD3E4F92DB423ACFE57B6BB6DBF45DD961DB5BB3C3A2E7
+      9FDB5FE92A8FB1549D5C6C0B9DF59370BE60D3B4C6DA542FB87A600E1C5DA3CB
+      67AD6680D5A1E8F1ADDA739DB7CF3B1D5DF3446FCD5E27401D5D6BD2C9E5733E
+      7CAEBD32E925B8946C0E391F4C80BC8DA64D0D15BBB6D41E59BD3B7BCD537D95
+      3BCCE85CD9563338F281894EFD27BE088C3CF4FEC4EEF3DB9E85CAC4495487A3
+      C74101D987CAC401DBD9F86721F3F726CAF45513F5DE81BC4FDC92B2FE30A5AD
+      349ED1F9EDD3A94DE38170F2F4F79ED937DCF70CE1438EAE7BA52463F5C436F6
+      B7BF873E30BD99B17AD22F86D61D6B0CF36FF0A0EC88
+    }
+  end
+  object pmAlarms: TPopupMenu
+    OnPopup = pmAlarmsPopup
+    Left = 400
+    Top = 288
+    object miAdd: TMenuItem
+      Caption = 'Add'
+      ShortCut = 45
+      OnClick = tbAddClick
+    end
+    object miEdit: TMenuItem
+      Caption = 'Edit'
+      ShortCut = 13
+      OnClick = tbEditClick
+    end
+    object miRestart: TMenuItem
+      Caption = 'Restart'
+      OnClick = tbRestartClick
+    end
+    object miTest: TMenuItem
+      Caption = 'Test'
+      ShortCut = 116
+      OnClick = tbTestClick
+    end
+    object mi2: TMenuItem
+      Caption = '-'
+    end
+    object miSetInactive: TMenuItem
+      Caption = 'Activate'
+      OnClick = tbInactiveClick
+    end
+    object miDelete: TMenuItem
+      Caption = 'Delete'
+      ShortCut = 8238
+      OnClick = tbRemoveClick
+    end
+    object miPurge: TMenuItem
+      Caption = 'Purge'
+      OnClick = tbPurgeClick
+    end
+    object mi3: TMenuItem
+      Caption = '-'
+    end
+    object miQuit: TMenuItem
+      Caption = 'Quit'
+      OnClick = miQuitClick
+    end
+  end
+end

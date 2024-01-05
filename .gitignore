@@ -1,0 +1,7 @@
+backup/
+lib/
+TEMP/
+*.exe
+*.gdb
+*.txt
+upx

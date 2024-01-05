@@ -1,0 +1,154 @@
+object NewAlarmForm: TNewAlarmForm
+  Left = 1057
+  Height = 268
+  Top = 161
+  Width = 336
+  BorderIcons = [biSystemMenu]
+  Caption = 'NewAlarmForm'
+  ClientHeight = 268
+  ClientWidth = 336
+  Menu = MainMenu1
+  Position = poMainFormCenter
+  LCLVersion = '2.0.6.0'
+  object Label9: TLabel
+    Left = 9
+    Height = 17
+    Top = 28
+    Width = 65
+    Caption = 'Start time:'
+    ParentColor = False
+  end
+  object edStartTime: TEdit
+    Left = 80
+    Height = 30
+    Top = 21
+    Width = 184
+    Color = clBtnFace
+    ReadOnly = True
+    TabOrder = 0
+    Text = '2012-11-27 19:55:40'
+  end
+  object Label1: TLabel
+    Left = 80
+    Height = 17
+    Top = 56
+    Width = 38
+    Caption = 'Hours'
+    ParentColor = False
+  end
+  object seHours: TSpinEdit
+    Left = 80
+    Height = 30
+    Top = 72
+    Width = 64
+    MaxValue = 999999
+    OnChange = seHoursChange
+    TabOrder = 1
+  end
+  object Label2: TLabel
+    Left = 152
+    Height = 17
+    Top = 56
+    Width = 50
+    Caption = 'Minutes'
+    ParentColor = False
+  end
+  object seMinutes: TSpinEdit
+    Left = 152
+    Height = 30
+    Top = 72
+    Width = 64
+    MaxValue = 59
+    OnChange = seHoursChange
+    TabOrder = 2
+  end
+  object Label3: TLabel
+    Left = 224
+    Height = 17
+    Top = 56
+    Width = 51
+    Caption = 'Seconds'
+    ParentColor = False
+  end
+  object seSeconds: TSpinEdit
+    Left = 224
+    Height = 30
+    Top = 72
+    Width = 64
+    MaxValue = 59
+    OnChange = seHoursChange
+    TabOrder = 3
+  end
+  object Label4: TLabel
+    Left = 9
+    Height = 17
+    Top = 76
+    Width = 62
+    Caption = 'Run after:'
+    ParentColor = False
+  end
+  object Label5: TLabel
+    Left = 8
+    Height = 17
+    Top = 104
+    Width = 55
+    Caption = 'Message'
+    ParentColor = False
+  end
+  object meMessage: TMemo
+    Left = 8
+    Height = 106
+    Top = 120
+    Width = 318
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    ScrollBars = ssAutoVertical
+    TabOrder = 4
+  end
+  object buCancel: TButton
+    Left = 174
+    Height = 25
+    Top = 234
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Caption = 'Cancel'
+    OnClick = buCancelClick
+    TabOrder = 5
+  end
+  object buOk: TButton
+    Left = 251
+    Height = 25
+    Top = 234
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Caption = 'OK'
+    Enabled = False
+    OnClick = buOkClick
+    TabOrder = 6
+  end
+  object Timer1: TTimer
+    Enabled = False
+    OnTimer = Timer1Timer
+    left = 56
+    top = 140
+  end
+  object MainMenu1: TMainMenu
+    left = 156
+    top = 140
+    object MenuItem1: TMenuItem
+      Caption = 'OK'
+      ShortCut = 13
+      Visible = False
+      OnClick = buOkClick
+    end
+    object MenuItem2: TMenuItem
+      Caption = 'Cancel'
+      ShortCut = 27
+      Visible = False
+      OnClick = buCancelClick
+    end
+  end
+  object OpenDialog1: TOpenDialog
+    left = 268
+    top = 136
+  end
+end

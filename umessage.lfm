@@ -1,0 +1,78 @@
+object MessageForm: TMessageForm
+  Left = 1399
+  Height = 150
+  Top = 190
+  Width = 300
+  Caption = 'Alarmer'
+  ClientHeight = 150
+  ClientWidth = 300
+  Menu = mmMessage
+  LCLVersion = '2.0.6.0'
+  object Label1: TLabel
+    Left = 16
+    Height = 72
+    Top = 8
+    Width = 267
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    AutoSize = False
+    Caption = 'Message'
+    ParentColor = False
+    WordWrap = True
+  end
+  object Label2: TLabel
+    Left = 16
+    Height = 17
+    Top = 86
+    Width = 148
+    Anchors = [akLeft, akBottom]
+    Caption = 'Launch file in 10 seconds'
+    Font.Pitch = fpVariable
+    Font.Style = [fsItalic]
+    ParentColor = False
+    ParentFont = False
+  end
+  object buLaunch: TButton
+    Left = 184
+    Height = 25
+    Top = 112
+    Width = 99
+    Anchors = [akRight, akBottom]
+    Caption = 'Launch now!'
+    Default = True
+    OnClick = buLaunchClick
+    TabOrder = 0
+  end
+  object buCancel: TButton
+    Left = 82
+    Height = 25
+    Top = 112
+    Width = 99
+    Anchors = [akRight, akBottom]
+    Caption = 'Cancel'
+    OnClick = buCancelClick
+    TabOrder = 1
+  end
+  object mmMessage: TMainMenu
+    left = 180
+    top = 60
+    object MenuItem1: TMenuItem
+      Caption = 'Cancel'
+      ShortCut = 27
+      Visible = False
+      OnClick = buCancelClick
+    end
+    object MenuItem2: TMenuItem
+      Caption = 'Launch now!'
+      ShortCut = 13
+      Visible = False
+      OnClick = buLaunchClick
+    end
+  end
+  object Timer1: TTimer
+    Enabled = False
+    Interval = 10
+    OnTimer = Timer1Timer
+    left = 260
+    top = 60
+  end
+end
