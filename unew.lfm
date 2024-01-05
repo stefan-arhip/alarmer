@@ -9,18 +9,18 @@ object NewAlarmForm: TNewAlarmForm
   ClientWidth = 336
   Menu = MainMenu1
   Position = poMainFormCenter
-  LCLVersion = '2.0.6.0'
+  LCLVersion = '3.0.0.3'
   object Label9: TLabel
     Left = 9
-    Height = 17
+    Height = 15
     Top = 28
-    Width = 65
+    Width = 54
     Caption = 'Start time:'
     ParentColor = False
   end
   object edStartTime: TEdit
     Left = 80
-    Height = 30
+    Height = 23
     Top = 21
     Width = 184
     Color = clBtnFace
@@ -30,15 +30,15 @@ object NewAlarmForm: TNewAlarmForm
   end
   object Label1: TLabel
     Left = 80
-    Height = 17
+    Height = 15
     Top = 56
-    Width = 38
+    Width = 32
     Caption = 'Hours'
     ParentColor = False
   end
   object seHours: TSpinEdit
     Left = 80
-    Height = 30
+    Height = 23
     Top = 72
     Width = 64
     MaxValue = 999999
@@ -47,15 +47,15 @@ object NewAlarmForm: TNewAlarmForm
   end
   object Label2: TLabel
     Left = 152
-    Height = 17
+    Height = 15
     Top = 56
-    Width = 50
+    Width = 43
     Caption = 'Minutes'
     ParentColor = False
   end
   object seMinutes: TSpinEdit
     Left = 152
-    Height = 30
+    Height = 23
     Top = 72
     Width = 64
     MaxValue = 59
@@ -64,15 +64,15 @@ object NewAlarmForm: TNewAlarmForm
   end
   object Label3: TLabel
     Left = 224
-    Height = 17
+    Height = 15
     Top = 56
-    Width = 51
+    Width = 44
     Caption = 'Seconds'
     ParentColor = False
   end
   object seSeconds: TSpinEdit
     Left = 224
-    Height = 30
+    Height = 23
     Top = 72
     Width = 64
     MaxValue = 59
@@ -81,17 +81,17 @@ object NewAlarmForm: TNewAlarmForm
   end
   object Label4: TLabel
     Left = 9
-    Height = 17
+    Height = 15
     Top = 76
-    Width = 62
+    Width = 51
     Caption = 'Run after:'
     ParentColor = False
   end
   object Label5: TLabel
     Left = 8
-    Height = 17
+    Height = 15
     Top = 104
-    Width = 55
+    Width = 46
     Caption = 'Message'
     ParentColor = False
   end
@@ -111,8 +111,8 @@ object NewAlarmForm: TNewAlarmForm
     Width = 75
     Anchors = [akRight, akBottom]
     Caption = 'Cancel'
-    OnClick = buCancelClick
     TabOrder = 5
+    OnClick = buCancelClick
   end
   object buOk: TButton
     Left = 251
@@ -122,18 +122,18 @@ object NewAlarmForm: TNewAlarmForm
     Anchors = [akRight, akBottom]
     Caption = 'OK'
     Enabled = False
-    OnClick = buOkClick
     TabOrder = 6
+    OnClick = buOkClick
   end
   object Timer1: TTimer
     Enabled = False
     OnTimer = Timer1Timer
-    left = 56
-    top = 140
+    Left = 56
+    Top = 140
   end
   object MainMenu1: TMainMenu
-    left = 156
-    top = 140
+    Left = 156
+    Top = 140
     object MenuItem1: TMenuItem
       Caption = 'OK'
       ShortCut = 13
@@ -148,7 +148,7 @@ object NewAlarmForm: TNewAlarmForm
     end
   end
   object OpenDialog1: TOpenDialog
-    left = 268
-    top = 136
+    Left = 268
+    Top = 136
   end
 end

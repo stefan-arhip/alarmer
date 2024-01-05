@@ -7,7 +7,7 @@ object MessageForm: TMessageForm
   ClientHeight = 150
   ClientWidth = 300
   Menu = mmMessage
-  LCLVersion = '2.0.6.0'
+  LCLVersion = '3.0.0.3'
   object Label1: TLabel
     Left = 16
     Height = 72
@@ -21,9 +21,9 @@ object MessageForm: TMessageForm
   end
   object Label2: TLabel
     Left = 16
-    Height = 17
-    Top = 86
-    Width = 148
+    Height = 15
+    Top = 88
+    Width = 130
     Anchors = [akLeft, akBottom]
     Caption = 'Launch file in 10 seconds'
     Font.Pitch = fpVariable
@@ -39,8 +39,8 @@ object MessageForm: TMessageForm
     Anchors = [akRight, akBottom]
     Caption = 'Launch now!'
     Default = True
-    OnClick = buLaunchClick
     TabOrder = 0
+    OnClick = buLaunchClick
   end
   object buCancel: TButton
     Left = 82
@@ -49,12 +49,12 @@ object MessageForm: TMessageForm
     Width = 99
     Anchors = [akRight, akBottom]
     Caption = 'Cancel'
-    OnClick = buCancelClick
     TabOrder = 1
+    OnClick = buCancelClick
   end
   object mmMessage: TMainMenu
-    left = 180
-    top = 60
+    Left = 180
+    Top = 60
     object MenuItem1: TMenuItem
       Caption = 'Cancel'
       ShortCut = 27
@@ -72,7 +72,7 @@ object MessageForm: TMessageForm
     Enabled = False
     Interval = 10
     OnTimer = Timer1Timer
-    left = 260
-    top = 60
+    Left = 260
+    Top = 60
   end
 end
