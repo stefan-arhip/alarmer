@@ -1,15 +1,14 @@
-object NewAlarmForm: TNewAlarmForm
+object fNew: TfNew
   Left = 1057
   Height = 268
   Top = 161
   Width = 336
   BorderIcons = [biSystemMenu]
-  Caption = 'NewAlarmForm'
+  Caption = 'fNew'
   ClientHeight = 268
   ClientWidth = 336
   Menu = MainMenu1
   Position = poMainFormCenter
-  LCLVersion = '3.0.0.3'
   object Label9: TLabel
     Left = 9
     Height = 15
@@ -42,8 +41,8 @@ object NewAlarmForm: TNewAlarmForm
     Top = 72
     Width = 64
     MaxValue = 999999
-    OnChange = seHoursChange
     TabOrder = 1
+    OnChange = seHoursChange
   end
   object Label2: TLabel
     Left = 152
@@ -59,8 +58,8 @@ object NewAlarmForm: TNewAlarmForm
     Top = 72
     Width = 64
     MaxValue = 59
-    OnChange = seHoursChange
     TabOrder = 2
+    OnChange = seHoursChange
   end
   object Label3: TLabel
     Left = 224
@@ -76,8 +75,8 @@ object NewAlarmForm: TNewAlarmForm
     Top = 72
     Width = 64
     MaxValue = 59
-    OnChange = seHoursChange
     TabOrder = 3
+    OnChange = seHoursChange
   end
   object Label4: TLabel
     Left = 9

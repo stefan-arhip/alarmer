@@ -10,9 +10,9 @@ uses
 
 type
 
-  { TNewAlarmForm }
+  { TfNew }
 
-  TNewAlarmForm = class(TForm)
+  TfNew = class(TForm)
     buCancel: TButton;
     buOk: TButton;
     edStartTime: TEdit;
@@ -42,35 +42,35 @@ type
   end;
 
 var
-  NewAlarmForm: TNewAlarmForm;
+  fNew: TfNew;
 
 implementation
 
 {$R *.lfm}
 
-{ TNewAlarmForm }
+{ TfNew }
 
-procedure TNewAlarmForm.seHoursChange(Sender: TObject);
+procedure TfNew.seHoursChange(Sender: TObject);
 begin
   buOk.Enabled := seHours.Value + seMinutes.Value + seSeconds.Value > 0;
 end;
 
-procedure TNewAlarmForm.Timer1Timer(Sender: TObject);
+procedure TfNew.Timer1Timer(Sender: TObject);
 begin
   edStartTime.Text := FormatDateTime('yyyy-mm-dd hh:nn:ss', Now());
 end;
 
-procedure TNewAlarmForm.buCancelClick(Sender: TObject);
+procedure TfNew.buCancelClick(Sender: TObject);
 begin
   ModalResult := mrCancel;
 end;
 
-procedure TNewAlarmForm.buOkClick(Sender: TObject);
+procedure TfNew.buOkClick(Sender: TObject);
 begin
   ModalResult := mrOk;
 end;
 
-function TNewAlarmForm.Execute: boolean;
+function TfNew.Execute: boolean;
 begin
   Result := ShowModal = mrOk;
 end;

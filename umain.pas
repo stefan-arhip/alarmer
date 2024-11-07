@@ -6,27 +6,42 @@ interface
 
 uses
   Classes, SysUtils, sqlite3conn, sqldb, Forms, Controls, Graphics, Dialogs,
-  ComCtrls, StdCtrls, Spin, ExtCtrls, IniPropStorage, Menus, DateUtils, LCLIntf;
+  ComCtrls, StdCtrls, Spin, ExtCtrls, IniPropStorage, Menus, DateUtils,
+  LCLIntf, MMSystem, Windows, Clipbrd, LCLVersion, MD5;
 
 type
 
-  { TMainForm }
+  { TfMain }
 
-  TMainForm = class(TForm)
-    ChangeApplicationIconIfAnAlarmIsPassed: TCheckBox;
-    DisplayIconsOnTabs: TCheckBox;
-    DisplayMessageOfNextAlarmInTaskbar: TCheckBox;
-    DisplayNextAlarmAsTaskbarIcon: TCheckBox;
-    DisplayRemainingTimeOfNextAlarmInTaskbar: TCheckBox;
-    DisplayToolbar: TCheckBox;
-    FileToOpenInAlarm: TEdit;
+  TfMain = class(TForm)
+    chSound: TCheckBox;
+    chTaskbarIcon: TCheckBox;
+    chBuzz: TCheckBox;
+    chIcons: TCheckBox;
+    chTaskbarMessage: TCheckBox;
+    chTaskbarIconAlarm: TCheckBox;
+    chTaskbarTime: TCheckBox;
+    chToolbar: TCheckBox;
+    edFileOpen: TEdit;
     ImageList1: TImageList;
     ImageList2: TImageList;
     IniPropStorage1: TIniPropStorage;
-    laFileToOpenOnAlarm: TLabel;
-    laSecondsToDisplayMessage: TLabel;
+    chFileOpen: TCheckBox;
+    Label1: TLabel;
+    Label2: TLabel;
+    laChecksum: TLabel;
+    laComputer: TLabel;
+    laFPC: TLabel;
+    laLazarus: TLabel;
+    chMessageTime: TCheckBox;
+    laTarget: TLabel;
+    laUsername: TLabel;
+    laVersion: TLabel;
+    lbApplication: TLabel;
     lvAlarms: TListView;
     meHistory: TMemo;
+    miRemoveHours: TMenuItem;
+    miAddHours: TMenuItem;
     mi2: TMenuItem;
     mi3: TMenuItem;
     miAdd: TMenuItem;
@@ -38,14 +53,15 @@ type
     miSetInactive: TMenuItem;
     miTest: TMenuItem;
     OpenDialog1: TOpenDialog;
-    PageControl1: TPageControl;
+    pcMain: TPageControl;
     pmAlarms: TPopupMenu;
-    SelectFile: TButton;
-    seSecondsToDisplayMessage: TSpinEdit;
+    buFileSelect: TButton;
+    seMessageTime: TSpinEdit;
     Shape1: TShape;
-    ShortTimeFormat: TCheckBox;
-    ShowConfirmationDialogs: TCheckBox;
+    chTaskbarShorttime: TCheckBox;
+    chConfirmation: TCheckBox;
     Con: TSQLite3Connection;
+    seHoursIncrement: TSpinEdit;
     sql: TSQLQuery;
     Tr: TSQLTransaction;
     sbMain: TStatusBar;
@@ -61,21 +77,25 @@ type
     tbRestart: TToolButton;
     tbTest: TToolButton;
     Timer1: TTimer;
-    procedure DisplayIconsOnTabsChange(Sender: TObject);
-    procedure DisplayRemainingTimeOfNextAlarmInTaskbarChange(Sender: TObject);
-    procedure DisplayToolbarChange(Sender: TObject);
+    procedure chIconsChange(Sender: TObject);
+    procedure chMessageTimeChange(Sender: TObject);
+    procedure chTaskbarTimeChange(Sender: TObject);
+    procedure chToolbarChange(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure laChecksumClick(Sender: TObject);
     procedure lvAlarmsAdvancedCustomDrawItem(Sender: TCustomListView;
       Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage;
       var DefaultDraw: boolean);
     procedure lvAlarmsDblClick(Sender: TObject);
     procedure lvAlarmsSelectItem(Sender: TObject; Item: TListItem;
       Selected: boolean);
+    procedure miAddHoursClick(Sender: TObject);
     procedure miQuitClick(Sender: TObject);
+    procedure miRemoveHoursClick(Sender: TObject);
     procedure pmAlarmsPopup(Sender: TObject);
-    procedure SelectFileClick(Sender: TObject);
+    procedure buFileSelectClick(Sender: TObject);
     procedure tbAddClick(Sender: TObject);
     procedure tbEditClick(Sender: TObject);
     procedure tbInactiveClick(Sender: TObject);
@@ -90,8 +110,10 @@ type
 
   end;
 
+procedure BuzzForm(f: TForm);
+
 var
-  MainForm: TMainForm;
+  fMain: TfMain;
 
 implementation
 
@@ -99,9 +121,10 @@ implementation
 
 uses uNew, uMessage;
 
-  { TMainForm }
+  { TfMain }
 var
   LockLaunching: boolean;
+  CurrentUser, CurrentComputer: string;
 
 function SecondsToTimeHMS(s: integer; b: boolean): string;
 var
@@ -132,20 +155,68 @@ begin
     Result := Format('%.2d:%.2d:%.2d', [h, m, s]);
 end;
 
-function ShowTheMessage(ATitle, AMessage: string; ADelay: integer): integer;
+procedure BuzzForm(f: TForm);
+var
+  rS: TResourceStream;
+  i, j, x, y: integer;
+  dx, dy: integer;
+begin
+  // Project - Project Options... - Resources - Add...
+  // PlaySound('Buzz.wav', 0, SND_ASYNC);
+  rS := TResourceStream.Create(HINSTANCE, 'Buzz', Windows.RT_RCDATA);
+  try
+    MMSystem.PlaySound(PChar(rS.Memory), 0, SND_MEMORY or SND_ASYNC);
+  finally
+    rS.Free;
+  end;
+
+  Randomize;
+  dx := 10;
+  dy := 10;
+  x := f.Left;
+  y := f.Top;
+  for i := 1 to 5 do
+    for j := 1 to 5 do
+    begin
+      f.Left := x + Round(dx - Random * dx);
+      f.Top := y + round(dy - random * dy);
+    end;
+  f.Left := x;
+  f.Top := y;
+end;
+
+procedure PlayInternalSound;
+var
+  rS: TResourceStream;
+begin
+  // Project - Project Options... - Resources - Add...
+  // PlaySound('Buzz.wav', 0, SND_ASYNC);
+  rS := TResourceStream.Create(HINSTANCE, 'RTWARNING2', Windows.RT_RCDATA);
+  try
+    MMSystem.PlaySound(PChar(rS.Memory), 0, SND_MEMORY or SND_ASYNC);
+  finally
+    rS.Free;
+  end;
+end;
+
+function ShowTheMessage(ATitle, AMessage: string; ADelay: integer;
+  Instant: boolean): integer;
 begin
   if LockLaunching then
   begin
     Result := -1;
     Exit;
   end
+  else if Instant then
+    Result := 1
   else
   begin
     LockLaunching := True;
-    Application.CreateForm(TMessageForm, MessageForm);
-    with MessageForm do
+    Application.CreateForm(TfMessage, fMessage);
+    with fMessage do
     begin
       try
+        //Name := 'MessageForm';
         Caption := ATitle;
         Position := poMainFormCenter;
         FormStyle := fsStayOnTop;
@@ -153,6 +224,7 @@ begin
         Label1.Caption := AMessage;
         Timer1.Enabled := True;
         ShowModal;
+        //if fMain.BuzzMessageWindow.Checked then BuzzForm(MessageForm);
       finally
         Result := LaunchAlarm;
         Free;
@@ -162,15 +234,41 @@ begin
   end;
 end;
 
-procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);
+function GetUserFromWindows: string;
+var
+  UserName: string;
+  UserNameLen: dWord;
+begin
+  UserNameLen := 255;
+  SetLength(UserName, UserNameLen);
+  if GetUserName(PChar(UserName), UserNameLen) then
+    Result := Copy(UserName, 1, UserNameLen - 1)
+  else
+    Result := 'Unknown';
+end;
+
+function GetComputerNetName: string;
+var
+  buffer: array[0..255] of char;
+  Size: dWord;
+begin
+  Size := 256;
+  if GetComputerName(Buffer, Size) then
+    Result := Buffer
+  else
+    Result := 'Undetected';
+end;
+
+procedure TfMain.FormCloseQuery(Sender: TObject; var CanClose: boolean);
 begin
   CanClose := False;
   miQuitClick(Sender);
 end;
 
-procedure TMainForm.FormCreate(Sender: TObject);
+procedure TfMain.FormCreate(Sender: TObject);
 var
-  AppDir: string;
+  FileDate: integer;
+  s, strExeVersion, AppDir: string;
 begin
   AppDir := IncludeTrailingPathDelimiter(ExtractFileDir(ParamStr(0)));
   Con.DatabaseName := AppDir + 'alarmer.sqlite';
@@ -196,28 +294,42 @@ begin
   end;
   sql.PacketRecords := -1;
 
-  DisplayIconsOnTabsChange(Sender);
-  PageControl1.ActivePageIndex := 0;
+  laChecksum.Caption :=
+    'Checksum: ' + MD5.MD5Print(MD5File(Application.ExeName));
+  laUsername.Caption := 'Username: ' + CurrentUser;
+  laComputer.Caption := 'Computer: ' + GetComputerNetName;
+  FileDate := FileAge(Application.ExeName);
+  if FileDate > -1 then
+    strExeVersion := FormatDateTime('yyyymmdd-hhnn', FileDateToDateTime(FileDate))
+  else
+    strExeVersion := 'undetected';
+  laVersion.Caption := 'Exe Version: ' + strExeVersion;
+
+  laLazarus.Caption := 'Lazarus: ' + lcl_version;
+  laFPC.Caption := 'FPC: ' + {$I %FPCVersion%};
+  laTarget.Caption := 'Target: ' + {$I %FPCTarget%};
+
+  chIconsChange(Sender);
+  pcMain.ActivePageIndex := 0;
 end;
 
-procedure TMainForm.FormShow(Sender: TObject);
+procedure TfMain.FormShow(Sender: TObject);
 var
   Node1: TListItem;
   Length: integer;
-  Computer: string;
 begin
-  if ShowConfirmationDialogs.Checked then
+  if chConfirmation.Checked then
     if MessageDlg('Load list of alarms?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
       Exit;
 
   Timer1.Enabled := False;
-  Computer := GetEnvironmentVariable('Computername');
+  //Computer := GetEnvironmentVariable('Computername');
 
   sql.Close;
   sql.SQL.Clear;
   sql.SQL.Add('Select * From Usage Where StopTime Is Null');
   sql.SQL.Add('And Computer=:Computer Order By Id Limit 1;');
-  sql.ParamByName('Computer').AsString := Computer;
+  sql.ParamByName('Computer').AsString := CurrentComputer;
   sql.Open;
   if sql.RecordCount = 1 then
     if MessageDlg('Alarmer seems to be already open.'#13 +
@@ -241,7 +353,7 @@ begin
   sql.SQL.Add('Insert Into Usage(StartTime,Computer,Forced)');
   sql.SQL.Add('Values (:Now,:Computer,0);');
   sql.ParamByName('Now').AsDateTime := Now();
-  sql.ParamByName('Computer').AsString := Computer;
+  sql.ParamByName('Computer').AsString := CurrentComputer;
   sql.ExecSQL;
   Tr.Commit;
 
@@ -274,20 +386,26 @@ begin
   Timer1.Enabled := True;
 end;
 
-procedure TMainForm.tbAddClick(Sender: TObject);
+procedure TfMain.laChecksumClick(Sender: TObject);
+begin
+  Clipboard.AsText := Copy(laChecksum.Caption, Pos(': ', laChecksum.Caption), 999) +
+    ' *' + ExtractFileName(Application.ExeName);
+end;
+
+procedure TfMain.tbAddClick(Sender: TObject);
 var
   Node1: TListItem;
   StartTime, StopTime: TDateTime;
   Interval, IdAlarm: integer;
 begin
-  NewAlarmForm.Caption := 'New alarm';
-  NewAlarmForm.Timer1.Enabled := True;
-  NewAlarmForm.Timer1Timer(Sender);
-  if NewAlarmForm.Execute then
+  fNew.Caption := 'New alarm';
+  fNew.Timer1.Enabled := True;
+  fNew.Timer1Timer(Sender);
+  if fNew.Execute then
   begin
-    StartTime := ScanDateTime('yyyy-mm-dd hh:nn:ss', NewAlarmForm.edStartTime.Text);
-    Interval := NewAlarmForm.seHours.Value * 60 * 60 +
-      NewAlarmForm.seMinutes.Value * 60 + NewAlarmForm.seSeconds.Value;
+    StartTime := ScanDateTime('yyyy-mm-dd hh:nn:ss', fNew.edStartTime.Text);
+    Interval := fNew.seHours.Value * 60 * 60 + fNew.seMinutes.Value *
+      60 + fNew.seSeconds.Value;
     StopTime := IncSecond(StartTime, Interval);
 
     sql.Close;
@@ -297,7 +415,7 @@ begin
     sql.ParamByName('Active').AsBoolean := True;
     sql.ParamByName('StartTime').AsDateTime := StartTime;
     sql.ParamByName('StopTime').AsDateTime := StopTime;
-    sql.ParamByName('Message').AsString := NewAlarmForm.meMessage.Text;
+    sql.ParamByName('Message').AsString := fNew.meMessage.Text;
     sql.ExecSQL;
     Tr.Commit;
     sql.Close;
@@ -310,7 +428,7 @@ begin
     sql.ParamByName('Active').AsBoolean := True;
     sql.ParamByName('StartTime').AsDateTime := StartTime;
     sql.ParamByName('StopTime').AsDateTime := StopTime;
-    sql.ParamByName('Message').AsString := NewAlarmForm.meMessage.Text;
+    sql.ParamByName('Message').AsString := fNew.meMessage.Text;
     sql.Open;
     IdAlarm := sql.FieldByName('Id').AsInteger;
     sql.Close;
@@ -324,11 +442,11 @@ begin
     Node1.SubItems.Add(FormatDateTime('yyyy-mm-dd hh:nn:ss', StopTime));
     Node1.SubItems.Add(Format('%d', [Round(Interval)]));
     Node1.SubItems.Add(SecondsToTimeHMS(Interval, False));
-    Node1.SubItems.Add(NewAlarmForm.meMessage.Text);
+    Node1.SubItems.Add(fNew.meMessage.Text);
   end;
 end;
 
-procedure TMainForm.lvAlarmsAdvancedCustomDrawItem(Sender: TCustomListView;
+procedure TfMain.lvAlarmsAdvancedCustomDrawItem(Sender: TCustomListView;
   Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage;
   var DefaultDraw: boolean);
 begin
@@ -339,75 +457,78 @@ begin
     Sender.Canvas.Font.Color := clDefault;
 end;
 
-procedure TMainForm.DisplayRemainingTimeOfNextAlarmInTaskbarChange(Sender: TObject);
+procedure TfMain.chTaskbarTimeChange(Sender: TObject);
 begin
-  DisplayMessageOfNextAlarmInTaskbar.Enabled :=
-    DisplayRemainingTimeOfNextAlarmInTaskbar.Checked;
-  ChangeApplicationIconIfAnAlarmIsPassed.Enabled :=
-    DisplayRemainingTimeOfNextAlarmInTaskbar.Checked;
-  ShortTimeFormat.Enabled :=
-    DisplayRemainingTimeOfNextAlarmInTaskbar.Checked;
+  chTaskbarMessage.Enabled := chTaskbarTime.Checked;
+  chTaskbarIcon.Enabled := chTaskbarTime.Checked;
+  chTaskbarShorttime.Enabled := chTaskbarTime.Checked;
+  chTaskbarIconAlarm.Enabled := chTaskbarTime.Checked;
 end;
 
-procedure TMainForm.DisplayIconsOnTabsChange(Sender: TObject);
+procedure TfMain.chIconsChange(Sender: TObject);
 begin
-  if DisplayIconsOnTabs.Checked then
-    PageControl1.Images := ImageList1
+  if chIcons.Checked then
+    pcMain.Images := ImageList1
   else
-    PageControl1.Images := nil;
+    pcMain.Images := nil;
 end;
 
-procedure TMainForm.DisplayToolbarChange(Sender: TObject);
+procedure TfMain.chMessageTimeChange(Sender: TObject);
 begin
-  tbMain.Visible := DisplayToolbar.Checked;
+  seMessageTime.Enabled := chMessageTime.Checked;
 end;
 
-procedure TMainForm.lvAlarmsDblClick(Sender: TObject);
+procedure TfMain.chToolbarChange(Sender: TObject);
+begin
+  tbMain.Visible := chToolbar.Checked;
+end;
+
+procedure TfMain.lvAlarmsDblClick(Sender: TObject);
 var
   StartTime, StopTime: TDateTime;
   Interval, H, N, S: integer;
 begin
   if lvAlarms.Selected = nil then
     Exit;
-  NewAlarmForm.Caption := 'Edit alarm';
-  NewAlarmForm.Timer1.Enabled := False;
-  NewAlarmForm.edStartTime.Text := lvAlarms.Selected.SubItems[1];
+  fNew.Caption := 'Edit alarm';
+  fNew.Timer1.Enabled := False;
+  fNew.edStartTime.Text := lvAlarms.Selected.SubItems[1];
   Interval := StrToInt(lvAlarms.Selected.SubItems[3]);
   H := Interval div 60 div 60;
   N := (Interval - H * 60 * 60) div 60;
   S := (Interval - H * 60 * 60 - N * 60);
-  NewAlarmForm.seHours.Value := H;
-  NewAlarmForm.seMinutes.Value := N;
-  NewAlarmForm.seSeconds.Value := S;
-  NewAlarmForm.meMessage.Text := lvAlarms.Selected.SubItems[5];
-  NewAlarmForm.seHoursChange(Sender);
-  if NewAlarmForm.Execute then
+  fNew.seHours.Value := H;
+  fNew.seMinutes.Value := N;
+  fNew.seSeconds.Value := S;
+  fNew.meMessage.Text := lvAlarms.Selected.SubItems[5];
+  fNew.seHoursChange(Sender);
+  if fNew.Execute then
     with lvAlarms.Selected do
     begin
-      StartTime := ScanDateTime('yyyy-mm-dd hh:nn:ss', NewAlarmForm.edStartTime.Text);
-      Interval := NewAlarmForm.seHours.Value * 60 * 60 +
-        NewAlarmForm.seMinutes.Value * 60 + NewAlarmForm.seSeconds.Value;
+      StartTime := ScanDateTime('yyyy-mm-dd hh:nn:ss', fNew.edStartTime.Text);
+      Interval := fNew.seHours.Value * 60 * 60 + fNew.seMinutes.Value *
+        60 + fNew.seSeconds.Value;
       StopTime := IncSecond(StartTime, Interval);
       SubItems[1] := FormatDateTime('yyyy-mm-dd hh:nn:ss', StartTime);
       SubItems[2] := FormatDateTime('yyyy-mm-dd hh:nn:ss', StopTime);
       SubItems[3] := IntToStr(Round(Interval));
       SubItems[4] := SecondsToTimeHMS(Interval, False);
-      SubItems[5] := NewAlarmForm.meMessage.Text;
+      SubItems[5] := fNew.meMessage.Text;
 
       sql.Close;
       sql.SQL.Clear;
       sql.SQL.Add(
         'Update Events Set StopTime=:StopTime,Message=:Message Where Id=:Id');
       sql.ParamByName('StopTime').AsDateTime := StopTime;
-      sql.ParamByName('Message').AsString := NewAlarmForm.meMessage.Text;
-      sql.ParamByName('Id').AsInteger := MainForm.lvAlarms.Selected.ImageIndex;
+      sql.ParamByName('Message').AsString := fNew.meMessage.Text;
+      sql.ParamByName('Id').AsInteger := fMain.lvAlarms.Selected.ImageIndex;
       sql.ExecSQL;
       Tr.Commit;
       sql.Close;
     end;
 end;
 
-procedure TMainForm.lvAlarmsSelectItem(Sender: TObject; Item: TListItem;
+procedure TfMain.lvAlarmsSelectItem(Sender: TObject; Item: TListItem;
   Selected: boolean);
 begin
   //PopupMenu1Popup(Sender);
@@ -424,9 +545,40 @@ begin
   tbRemove.Enabled := lvAlarms.Selected <> nil;
 end;
 
-procedure TMainForm.miQuitClick(Sender: TObject);
+procedure TfMain.miAddHoursClick(Sender: TObject);
+var
+  StartTime, StopTime: TDateTime;
+  Interval, H, N, S: integer;
 begin
-  if ShowConfirmationDialogs.Checked then
+  with lvAlarms.Selected do
+  begin
+    StartTime := ScanDateTime('yyyy-mm-dd hh:nn:ss', lvAlarms.Selected.SubItems[1]);
+    Interval := StrToInt(lvAlarms.Selected.SubItems[3]);
+    H := Interval div 60 div 60;
+    N := (Interval - H * 60 * 60) div 60;
+    S := (Interval - H * 60 * 60 - N * 60);
+    Interval := (H + seHoursIncrement.Value) * 60 * 60 + N * 60 + S;
+    StopTime := IncSecond(StartTime, Interval);
+    SubItems[1] := FormatDateTime('yyyy-mm-dd hh:nn:ss', StartTime);
+    SubItems[2] := FormatDateTime('yyyy-mm-dd hh:nn:ss', StopTime);
+    SubItems[3] := IntToStr(Round(Interval));
+    SubItems[4] := SecondsToTimeHMS(Interval, False);
+    //SubItems[5] := fNew.meMessage.Text;
+
+    sql.Close;
+    sql.SQL.Clear;
+    sql.SQL.Add('Update Events Set StopTime=:StopTime Where Id=:Id');
+    sql.ParamByName('StopTime').AsDateTime := StopTime;
+    sql.ParamByName('Id').AsInteger := fMain.lvAlarms.Selected.ImageIndex;
+    sql.ExecSQL;
+    Tr.Commit;
+    sql.Close;
+  end;
+end;
+
+procedure TfMain.miQuitClick(Sender: TObject);
+begin
+  if chConfirmation.Checked then
     if MessageDlg('Quit Alarmer?', mtWarning, [mbYes, mbNo], 0) <> mrYes then
       Exit;
 
@@ -435,7 +587,8 @@ begin
   sql.SQL.Add('Update Usage Set StopTime=:Now,Forced=-1');
   sql.SQL.Add('Where StopTime Is Null And Computer=:Computer;');
   sql.ParamByName('Now').AsDateTime := Now();
-  sql.ParamByName('Computer').AsString := GetEnvironmentVariable('Computername');
+  sql.ParamByName('Computer').AsString := CurrentComputer;
+  //GetEnvironmentVariable('Computername');
   sql.ExecSQL;
   Tr.Commit;
   sql.Close;
@@ -443,7 +596,42 @@ begin
   Application.Terminate;
 end;
 
-procedure TMainForm.pmAlarmsPopup(Sender: TObject);
+procedure TfMain.miRemoveHoursClick(Sender: TObject);
+var
+  StartTime, StopTime: TDateTime;
+  Interval, H, N, S: integer;
+begin
+  with lvAlarms.Selected do
+  begin
+    StartTime := ScanDateTime('yyyy-mm-dd hh:nn:ss', lvAlarms.Selected.SubItems[1]);
+    Interval := StrToInt(lvAlarms.Selected.SubItems[3]);
+    H := Interval div 60 div 60;
+    N := (Interval - H * 60 * 60) div 60;
+    S := (Interval - H * 60 * 60 - N * 60);
+    Interval := (H - seHoursIncrement.Value) * 60 * 60 + N * 60 + S;
+    StopTime := IncSecond(StartTime, Interval);
+    //if Interval > seHoursIncrement.Value then
+    if StopTime > Now() then
+    begin
+      SubItems[1] := FormatDateTime('yyyy-mm-dd hh:nn:ss', StartTime);
+      SubItems[2] := FormatDateTime('yyyy-mm-dd hh:nn:ss', StopTime);
+      SubItems[3] := IntToStr(Round(Interval));
+      SubItems[4] := SecondsToTimeHMS(Interval, False);
+      //SubItems[5] := fNew.meMessage.Text;
+
+      sql.Close;
+      sql.SQL.Clear;
+      sql.SQL.Add('Update Events Set StopTime=:StopTime Where Id=:Id');
+      sql.ParamByName('StopTime').AsDateTime := StopTime;
+      sql.ParamByName('Id').AsInteger := fMain.lvAlarms.Selected.ImageIndex;
+      sql.ExecSQL;
+      Tr.Commit;
+      sql.Close;
+    end;
+  end;
+end;
+
+procedure TfMain.pmAlarmsPopup(Sender: TObject);
 begin
   if lvAlarms.ItemIndex <> -1 then
     if lvAlarms.Items[lvAlarms.ItemIndex].SubItems[0] = 'No' then
@@ -452,68 +640,70 @@ begin
       miSetInactive.Caption := 'Deactivate';
   tbInactive.Caption := miSetInactive.Caption;
 
-  miSetInactive.Enabled := (lvAlarms.ItemIndex <> -1) and MainForm.Visible;
-  miDelete.Enabled := (lvAlarms.ItemIndex <> -1) and MainForm.Visible;
-  miEdit.Enabled := (lvAlarms.ItemIndex <> -1) and MainForm.Visible;
-  miAdd.Enabled := MainForm.Visible;
-  miTest.Enabled := (lvAlarms.ItemIndex <> -1) and MainForm.Visible;
+  miSetInactive.Enabled := (lvAlarms.ItemIndex <> -1) and fMain.Visible;
+  miDelete.Enabled := (lvAlarms.ItemIndex <> -1) and fMain.Visible;
+  miEdit.Enabled := (lvAlarms.ItemIndex <> -1) and fMain.Visible;
+  miRemoveHours.Caption := Format('-%d hours', [seHoursIncrement.Value]);
+  miAddHours.Caption := Format('+%d hours', [seHoursIncrement.Value]);
+  miAdd.Enabled := fMain.Visible;
+  miTest.Enabled := (lvAlarms.ItemIndex <> -1) and fMain.Visible;
 end;
 
-procedure TMainForm.SelectFileClick(Sender: TObject);
+procedure TfMain.buFileSelectClick(Sender: TObject);
 begin
   if OpenDialog1.Execute then
     if ExtractFilePath(ParamStr(0)) = ExtractFilePath(OpenDialog1.FileName) then
-      FileToOpenInAlarm.Text := ExtractFileName(OpenDialog1.FileName)
+      edFileOpen.Text := ExtractFileName(OpenDialog1.FileName)
     else
-      FileToOpenInAlarm.Text := OpenDialog1.FileName;
+      edFileOpen.Text := OpenDialog1.FileName;
 end;
 
-procedure TMainForm.tbEditClick(Sender: TObject);
+procedure TfMain.tbEditClick(Sender: TObject);
 var
   StartTime, StopTime: TDateTime;
   Interval, H, N, S: integer;
 begin
   if lvAlarms.Selected = nil then
     Exit;
-  NewAlarmForm.Caption := 'Edit alarm';
-  NewAlarmForm.Timer1.Enabled := False;
-  NewAlarmForm.edStartTime.Text := lvAlarms.Selected.SubItems[1];
+  fNew.Caption := 'Edit alarm';
+  fNew.Timer1.Enabled := False;
+  fNew.edStartTime.Text := lvAlarms.Selected.SubItems[1];
   Interval := StrToInt(lvAlarms.Selected.SubItems[3]);
   H := Interval div 60 div 60;
   N := (Interval - H * 60 * 60) div 60;
   S := (Interval - H * 60 * 60 - N * 60);
-  NewAlarmForm.seHours.Value := H;
-  NewAlarmForm.seMinutes.Value := N;
-  NewAlarmForm.seSeconds.Value := S;
-  NewAlarmForm.meMessage.Text := lvAlarms.Selected.SubItems[5];
-  NewAlarmForm.seHoursChange(Sender);
-  if NewAlarmForm.Execute then
+  fNew.seHours.Value := H;
+  fNew.seMinutes.Value := N;
+  fNew.seSeconds.Value := S;
+  fNew.meMessage.Text := lvAlarms.Selected.SubItems[5];
+  fNew.seHoursChange(Sender);
+  if fNew.Execute then
     with lvAlarms.Selected do
     begin
-      StartTime := ScanDateTime('yyyy-mm-dd hh:nn:ss', NewAlarmForm.edStartTime.Text);
-      Interval := NewAlarmForm.seHours.Value * 60 * 60 +
-        NewAlarmForm.seMinutes.Value * 60 + NewAlarmForm.seSeconds.Value;
+      StartTime := ScanDateTime('yyyy-mm-dd hh:nn:ss', fNew.edStartTime.Text);
+      Interval := fNew.seHours.Value * 60 * 60 + fNew.seMinutes.Value *
+        60 + fNew.seSeconds.Value;
       StopTime := IncSecond(StartTime, Interval);
       SubItems[1] := FormatDateTime('yyyy-mm-dd hh:nn:ss', StartTime);
       SubItems[2] := FormatDateTime('yyyy-mm-dd hh:nn:ss', StopTime);
       SubItems[3] := IntToStr(Round(Interval));
       SubItems[4] := SecondsToTimeHMS(Interval, False);
-      SubItems[5] := NewAlarmForm.meMessage.Text;
+      SubItems[5] := fNew.meMessage.Text;
 
       sql.Close;
       sql.SQL.Clear;
       sql.SQL.Add(
         'Update Events Set StopTime=:StopTime,Message=:Message Where Id=:Id');
       sql.ParamByName('StopTime').AsDateTime := StopTime;
-      sql.ParamByName('Message').AsString := NewAlarmForm.meMessage.Text;
-      sql.ParamByName('Id').AsInteger := MainForm.lvAlarms.Selected.ImageIndex;
+      sql.ParamByName('Message').AsString := fNew.meMessage.Text;
+      sql.ParamByName('Id').AsInteger := fMain.lvAlarms.Selected.ImageIndex;
       sql.ExecSQL;
       Tr.Commit;
       sql.Close;
     end;
 end;
 
-procedure TMainForm.tbInactiveClick(Sender: TObject);
+procedure TfMain.tbInactiveClick(Sender: TObject);
 begin
   if lvAlarms.ItemIndex <> -1 then
     if lvAlarms.Selected.SubItems[0] = 'No' then
@@ -548,7 +738,7 @@ begin
     end;
 end;
 
-procedure TMainForm.tbPurgeClick(Sender: TObject);
+procedure TfMain.tbPurgeClick(Sender: TObject);
 begin
   if MessageDlg('Remove from database all inactive alarms?', mtConfirmation,
     [mbYes, mbNo], 0) = mrYes then
@@ -562,7 +752,7 @@ begin
   end;
 end;
 
-procedure TMainForm.tbRemoveClick(Sender: TObject);
+procedure TfMain.tbRemoveClick(Sender: TObject);
 var
   i, Pos: integer;
 begin
@@ -589,7 +779,7 @@ begin
   end;
 end;
 
-procedure TMainForm.tbRestartClick(Sender: TObject);
+procedure TfMain.tbRestartClick(Sender: TObject);
 var
   StartTime, StopTime: TDateTime;
   Length: integer;
@@ -627,12 +817,14 @@ begin
   end;
 end;
 
-procedure TMainForm.tbTestClick(Sender: TObject);
+procedure TfMain.tbTestClick(Sender: TObject);
+var
+  str: string;
 begin
   if lvAlarms.Selected.SubItems[5] <> '' then
   begin
     case ShowTheMessage('Alarmer', lvAlarms.Selected.SubItems[5],
-        seSecondsToDisplayMessage.Value * 1000) of
+        seMessageTime.Value * 1000, not chMessageTime.Checked) of
       0:
       begin
         sql.Close;
@@ -644,19 +836,24 @@ begin
         sql.Close;
       end;
       1:
-        if FileExists(ExtractFilePath(Application.ExeName) + FileToOpenInAlarm.Text) then
-          LCLIntf.OpenURL(ExtractFilePath(Application.ExeName) + FileToOpenInAlarm.Text);
+      begin
+        if chSound.Checked then
+          PlayInternalSound;
+        str := ExtractFilePath(Application.ExeName) + edFileOpen.Text;
+        if chFileOpen.Checked and FileExists(str) then
+          LCLIntf.OpenURL(str);
+      end;
     end;
   end;
 end;
 
-procedure TMainForm.Timer1Timer(Sender: TObject);
+procedure TfMain.Timer1Timer(Sender: TObject);
 var
   i, Interval, Minimum, ActiveAlarms, InactiveAlarms: integer;
   CurrentTime, AlarmTime: TDateTime;
-  Messsage: string;
+  str, Messsage: string;
   AnAlarmIsPassed: boolean;
-  bmp: TBitmap;
+  bmp: Graphics.TBitmap;
 begin
   CurrentTime := Now();
   Minimum := 0;
@@ -676,7 +873,7 @@ begin
         lvAlarms.Items[i - 1].SubItems[0] := 'No';
         if lvAlarms.Items[i - 1].SubItems[5] <> '' then
           case ShowTheMessage('Alarmer', lvAlarms.Items[i - 1].SubItems[5],
-              seSecondsToDisplayMessage.Value * 1000) of
+              seMessageTime.Value * 1000, not chMessageTime.Checked) of
             -1: Exit;
             0:
             begin
@@ -688,10 +885,14 @@ begin
               Tr.Commit;
               sql.Close;
             end;
-            1: if FileExists(ExtractFilePath(Application.ExeName) +
-                FileToOpenInAlarm.Text) then
-                OpenURL(ExtractFilePath(Application.ExeName) +
-                  FileToOpenInAlarm.Text);
+            1:
+            begin
+              if chSound.Checked then
+                PlayInternalSound;
+              str := ExtractFilePath(Application.ExeName) + edFileOpen.Text;
+              if chFileOpen.Checked and FileExists(str) then
+                LCLIntf.OpenURL(str);
+            end;
           end;
       end
       else
@@ -718,32 +919,32 @@ begin
       Inc(InactiveAlarms);
   end;
 
-  if DisplayRemainingTimeOfNextAlarmInTaskbar.Checked then
+  if chTaskbarTime.Checked then
   begin
-    if DisplayMessageOfNextAlarmInTaskbar.Checked then
+    if chTaskbarMessage.Checked then
     begin
-      Application.Title := SecondsToTimeHMS(Minimum, ShortTimeFormat.Checked) +
+      Application.Title := SecondsToTimeHMS(Minimum, chTaskbarShorttime.Checked) +
         ' - ' + Messsage;
-      MainForm.Caption := SecondsToTimeHMS(Minimum, ShortTimeFormat.Checked) +
+      fMain.Caption := SecondsToTimeHMS(Minimum, chTaskbarShorttime.Checked) +
         ' - ' + Messsage;
     end
     else
     begin
       Application.Title := 'Alarmer ' + SecondsToTimeHMS(Minimum,
-        ShortTimeFormat.Checked) + '';
-      MainForm.Caption := 'Alarmer ' + SecondsToTimeHMS(Minimum,
-        ShortTimeFormat.Checked) + '';
+        chTaskbarShorttime.Checked) + '';
+      fMain.Caption := 'Alarmer ' + SecondsToTimeHMS(Minimum,
+        chTaskbarShorttime.Checked) + '';
       //TrayIcon1.Hint:= 'Alarmer '+ SecondsToTimeHMS(Minimum)+ '';
     end;
   end
   else
   begin
     Application.Title := 'Alarmer';
-    MainForm.Caption := 'Alarmer';
+    fMain.Caption := 'Alarmer';
     //TrayIcon1.Hint:= 'Alarmer';
   end;
 
-  if DisplayNextAlarmAsTaskbarIcon.Checked then
+  if chTaskbarIconAlarm.Checked then
   begin
     bmp := Graphics.TBitmap.Create;
     try
@@ -758,8 +959,8 @@ begin
       bmp.Canvas.Rectangle(0, 0, bmp.Width, bmp.Height);
       //bmp.TransparentColor := clWhite;
       //bmp.Canvas.TextOut(1, 1, 'next');
-      //bmp.Canvas.TextOut(1, 16, SecondsToTimeHMS(Minimum, ShortTimeFormat.Checked));
-      Messsage := SecondsToTimeHMS(Minimum, ShortTimeFormat.Checked);
+      //bmp.Canvas.TextOut(1, 16, SecondsToTimeHMS(Minimum, chTaskbarShorttime.Checked));
+      Messsage := SecondsToTimeHMS(Minimum, chTaskbarShorttime.Checked);
       bmp.Canvas.TextOut((bmp.Width - bmp.Canvas.TextWidth(Messsage)) div
         2, (bmp.Height - bmp.Canvas.TextHeight(Messsage)) div 2, Messsage);
       Application.Icon.Assign(bmp);
@@ -768,9 +969,9 @@ begin
     end;
   end
   else
-  if ChangeApplicationIconIfAnAlarmIsPassed.Checked and AnAlarmIsPassed then
+  if chTaskbarIcon.Checked and AnAlarmIsPassed then
   begin
-    bmp := TBitmap.Create;
+    bmp := Graphics.TBitmap.Create;
     try
       ImageList2.GetBitmap(1, bmp);
       Application.Icon.Assign(bmp);
@@ -780,7 +981,7 @@ begin
   end
   else
   begin
-    bmp := TBitmap.Create;
+    bmp := Graphics.TBitmap.Create;
     try
       ImageList2.GetBitmap(0, bmp);
       Application.Icon.Assign(bmp);
@@ -794,5 +995,7 @@ end;
 
 initialization
   LockLaunching := False;
+  CurrentUser := GetUserFromWindows;
+  CurrentComputer := GetComputerNetName;
 
 end.

@@ -1,13 +1,14 @@
-object MessageForm: TMessageForm
+object fMessage: TfMessage
   Left = 1399
   Height = 150
   Top = 190
   Width = 300
+  BorderIcons = [biSystemMenu]
   Caption = 'Alarmer'
   ClientHeight = 150
   ClientWidth = 300
   Menu = mmMessage
-  LCLVersion = '3.0.0.3'
+  OnActivate = FormActivate
   object Label1: TLabel
     Left = 16
     Height = 72

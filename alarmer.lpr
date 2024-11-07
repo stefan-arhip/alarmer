@@ -16,10 +16,10 @@ uses
 
 begin
   RequireDerivedFormResource := True;
-  Application.Scaled := True;
+  Application.Scaled:=True;
   Application.Initialize;
-  Application.CreateForm(TMainForm, MainForm);
-  Application.CreateForm(TNewAlarmForm, NewAlarmForm);
-  Application.CreateForm(TMessageForm, MessageForm);
+  Application.CreateForm(TfMain, fMain);
+  Application.CreateForm(TfNew, fNew);
+  Application.CreateForm(TfMessage, fMessage);
   Application.Run;
 end.

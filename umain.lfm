@@ -1,4 +1,4 @@
-object MainForm: TMainForm
+object fMain: TfMain
   Left = 283
   Height = 401
   Top = 125
@@ -6,19 +6,18 @@ object MainForm: TMainForm
   Caption = 'Alarmer'
   ClientHeight = 401
   ClientWidth = 741
+  SessionProperties = 'chBuzz.Checked;chConfirmation.Checked;chFileOpen.Checked;chIcons.Checked;chMessageTime.Checked;chSound.Checked;chTaskbarIcon.Checked;chTaskbarIconAlarm.Checked;chTaskbarMessage.Checked;chTaskbarShorttime.Checked;chTaskbarTime.Checked;chToolbar.Checked;edFileOpen.Text;Height;Left;lvAlarms.Columns;seMessageTime.Value;Top;Width;seHoursIncrement.Value'
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnShow = FormShow
-  SessionProperties = 'ChangeApplicationIconIfAnAlarmIsPassed.Checked;DisplayIconsOnTabs.Checked;DisplayMessageOfNextAlarmInTaskbar.Checked;DisplayNextAlarmAsTaskbarIcon.Checked;DisplayRemainingTimeOfNextAlarmInTaskbar.Checked;DisplayToolbar.Checked;FileToOpenInAlarm.Text;Height;Left;lvAlarms.Columns;seSecondsToDisplayMessage.Value;ShortTimeFormat.Checked;Top;Width;ShowConfirmationDialogs.Checked'
-  LCLVersion = '3.0.0.3'
-  object PageControl1: TPageControl
+  object pcMain: TPageControl
     Left = 0
     Height = 378
     Top = 0
     Width = 741
-    ActivePage = TabSheet1
+    ActivePage = TabSheet2
     Align = alClient
-    TabIndex = 0
+    TabIndex = 1
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'ALARMS'
@@ -148,132 +147,172 @@ object MainForm: TMainForm
       ClientHeight = 350
       ClientWidth = 733
       ImageIndex = 8
-      object laFileToOpenOnAlarm: TLabel
-        Left = 15
-        Height = 15
-        Top = 15
-        Width = 112
-        Caption = 'File to open on alarm'
-        ParentColor = False
-      end
-      object FileToOpenInAlarm: TEdit
-        Left = 12
-        Height = 23
-        Top = 31
-        Width = 672
-        Anchors = [akTop, akLeft, akRight]
-        ReadOnly = True
-        TabOrder = 0
-      end
-      object SelectFile: TButton
-        Left = 692
-        Height = 25
-        Top = 31
-        Width = 24
-        Anchors = [akTop, akRight]
-        Caption = '...'
-        TabOrder = 1
-        OnClick = SelectFileClick
-      end
-      object ShowConfirmationDialogs: TCheckBox
+      object chConfirmation: TCheckBox
         Left = 12
         Height = 19
-        Top = 70
+        Top = 88
         Width = 160
         Caption = 'Show confirmation dialogs'
         Checked = True
         State = cbChecked
-        TabOrder = 2
+        TabOrder = 0
       end
-      object DisplayRemainingTimeOfNextAlarmInTaskbar: TCheckBox
+      object chTaskbarTime: TCheckBox
         Left = 12
         Height = 19
-        Top = 90
+        Top = 108
         Width = 267
         Caption = 'Display remaining time of next alarm in taskbar'
         Checked = True
         State = cbChecked
-        TabOrder = 3
-        OnChange = DisplayRemainingTimeOfNextAlarmInTaskbarChange
+        TabOrder = 1
+        OnChange = chTaskbarTimeChange
       end
-      object DisplayToolbar: TCheckBox
+      object chToolbar: TCheckBox
         Left = 12
         Height = 19
-        Top = 200
+        Top = 218
         Width = 97
         Caption = 'Display toolbar'
         Checked = True
         State = cbChecked
-        TabOrder = 7
-        OnChange = DisplayToolbarChange
+        TabOrder = 5
+        OnChange = chToolbarChange
       end
-      object DisplayMessageOfNextAlarmInTaskbar: TCheckBox
+      object chTaskbarMessage: TCheckBox
         Left = 44
         Height = 19
-        Top = 110
+        Top = 128
         Width = 232
         Caption = 'Display message of next alarm in taskbar'
         Checked = True
         State = cbChecked
-        TabOrder = 4
+        TabOrder = 2
       end
-      object DisplayIconsOnTabs: TCheckBox
+      object chIcons: TCheckBox
         Left = 12
         Height = 19
-        Top = 220
+        Top = 238
         Width = 129
         Caption = 'Display icons on tabs'
-        TabOrder = 8
-        OnChange = DisplayIconsOnTabsChange
+        TabOrder = 6
+        OnChange = chIconsChange
       end
-      object ChangeApplicationIconIfAnAlarmIsPassed: TCheckBox
+      object chTaskbarIcon: TCheckBox
         Left = 44
         Height = 19
-        Top = 130
+        Top = 148
         Width = 264
         Caption = 'Change application''s icon if an alarm is passed'
-        TabOrder = 5
+        TabOrder = 3
       end
-      object laSecondsToDisplayMessage: TLabel
-        Left = 12
-        Height = 15
-        Top = 272
-        Width = 147
-        Caption = 'Seconds to display message'
-        ParentColor = False
-      end
-      object seSecondsToDisplayMessage: TSpinEdit
-        Left = 12
+      object seMessageTime: TSpinEdit
+        Left = 184
         Height = 23
-        Top = 291
-        Width = 84
+        Top = 288
+        Width = 82
+        Enabled = False
         MaxValue = 60
-        TabOrder = 9
+        MinValue = 1
+        TabOrder = 7
         Value = 10
       end
-      object ShortTimeFormat: TCheckBox
+      object chTaskbarShorttime: TCheckBox
         Left = 44
         Height = 19
-        Top = 170
+        Top = 188
         Width = 206
         Caption = 'Display short time format in taskbar'
-        TabOrder = 6
+        TabOrder = 4
       end
-      object DisplayNextAlarmAsTaskbarIcon: TCheckBox
+      object chTaskbarIconAlarm: TCheckBox
         Left = 44
         Height = 19
-        Top = 150
+        Top = 168
         Width = 196
         Caption = 'Display next alarm as taskbar icon'
-        TabOrder = 10
+        TabOrder = 8
       end
       object Shape1: TShape
-        Left = 213
+        Left = 488
         Height = 71
-        Top = 249
+        Top = 128
         Width = 92
         Pen.Color = clWhite
         Pen.Width = 0
+      end
+      object chFileOpen: TCheckBox
+        Left = 12
+        Height = 19
+        Top = 50
+        Width = 130
+        Caption = 'File to open on alarm'
+        Color = clDefault
+        ParentColor = False
+        TabOrder = 9
+      end
+      object buFileSelect: TButton
+        Left = 688
+        Height = 25
+        Top = 48
+        Width = 24
+        Anchors = [akTop, akRight]
+        Caption = '...'
+        TabOrder = 10
+        OnClick = buFileSelectClick
+      end
+      object chBuzz: TCheckBox
+        Left = 12
+        Height = 19
+        Top = 10
+        Width = 184
+        Caption = 'Buzz message window on show'
+        TabOrder = 11
+      end
+      object edFileOpen: TEdit
+        Left = 152
+        Height = 23
+        Top = 48
+        Width = 532
+        Anchors = [akTop, akLeft, akRight]
+        ReadOnly = True
+        TabOrder = 12
+      end
+      object chSound: TCheckBox
+        Left = 12
+        Height = 19
+        Top = 30
+        Width = 169
+        Caption = 'Play internal sound on alarm'
+        TabOrder = 13
+      end
+      object chMessageTime: TCheckBox
+        Left = 12
+        Height = 19
+        Top = 288
+        Width = 165
+        Caption = 'Seconds to display message'
+        Color = clDefault
+        ParentColor = False
+        TabOrder = 14
+        OnChange = chMessageTimeChange
+      end
+      object Label2: TLabel
+        Left = 12
+        Height = 15
+        Top = 315
+        Width = 144
+        Caption = 'Hours increment on alarms'
+      end
+      object seHoursIncrement: TSpinEdit
+        Left = 184
+        Height = 23
+        Top = 312
+        Width = 82
+        MaxValue = 21900
+        MinValue = 1
+        TabOrder = 15
+        Value = 12
       end
     end
     object TabSheet3: TTabSheet
@@ -282,12 +321,18 @@ object MainForm: TMainForm
       ClientWidth = 733
       ImageIndex = 9
       object meHistory: TMemo
-        Left = 4
-        Height = 341
-        Top = 8
-        Width = 726
+        Left = 8
+        Height = 261
+        Top = 88
+        Width = 713
         Anchors = [akTop, akLeft, akRight, akBottom]
         Lines.Strings = (
+          '2024-11-07'
+          '* Add buzz efect on show message'
+          '* Add internal resource wav sound'
+          '* Play internal wav sound by application'
+          '* Add option to add/remove an amount of hours to/from selected alarm'
+          ''
           '2024-01-05'
           '* Code published on github'
           ''
@@ -329,6 +374,93 @@ object MainForm: TMainForm
         ScrollBars = ssAutoBoth
         TabOrder = 0
       end
+      object lbApplication: TLabel
+        Left = 8
+        Height = 37
+        Top = 10
+        Width = 123
+        Caption = 'Alarmer'
+        Font.CharSet = ANSI_CHARSET
+        Font.Height = -32
+        Font.Name = 'Arial'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object Label1: TLabel
+        Left = 8
+        Height = 15
+        Top = 42
+        Width = 213
+        Caption = 'Set alarms with message and file launch '
+        ParentColor = False
+      end
+      object laUsername: TLabel
+        Left = 256
+        Height = 15
+        Top = 42
+        Width = 119
+        Caption = 'Username: undetected'
+        ParentColor = False
+      end
+      object laVersion: TLabel
+        Left = 256
+        Height = 15
+        Top = 26
+        Width = 125
+        Caption = 'Exe version: undetected'
+        ParentColor = False
+      end
+      object laChecksum: TLabel
+        Cursor = crHandPoint
+        Left = 256
+        Height = 15
+        Hint = 'Copiere în Clipboard'
+        Top = 10
+        Width = 122
+        Caption = 'Checksum: undetected'
+        ParentColor = False
+        ParentShowHint = False
+        ShowHint = True
+        OnClick = laChecksumClick
+      end
+      object laComputer: TLabel
+        Left = 256
+        Height = 15
+        Top = 58
+        Width = 120
+        Caption = 'Computer: undetected'
+        ParentColor = False
+      end
+      object laLazarus: TLabel
+        Left = 616
+        Height = 15
+        Top = 10
+        Width = 105
+        Anchors = [akTop, akRight]
+        Caption = 'Lazarus: undetected'
+        ParentColor = False
+      end
+      object laFPC: TLabel
+        Left = 635
+        Height = 15
+        Top = 26
+        Width = 87
+        Anchors = [akTop, akRight]
+        Caption = 'FPC: undetected'
+        ParentColor = False
+      end
+      object laTarget: TLabel
+        Left = 624
+        Height = 15
+        Top = 42
+        Width = 98
+        Anchors = [akTop, akRight]
+        Caption = 'Target: undetected'
+        ParentColor = False
+      end
     end
   end
   object sbMain: TStatusBar
@@ -352,7 +484,7 @@ object MainForm: TMainForm
     IniFileName = 'settings.ini'
     IniSection = 'Alarmer'
     Left = 672
-    Top = 88
+    Top = 120
   end
   object Con: TSQLite3Connection
     Connected = False
@@ -540,6 +672,16 @@ object MainForm: TMainForm
       Caption = 'Edit'
       ShortCut = 13
       OnClick = tbEditClick
+    end
+    object miRemoveHours: TMenuItem
+      Caption = '-12 hours'
+      ShortCut = 8315
+      OnClick = miRemoveHoursClick
+    end
+    object miAddHours: TMenuItem
+      Caption = '+12 hours'
+      ShortCut = 123
+      OnClick = miAddHoursClick
     end
     object miRestart: TMenuItem
       Caption = 'Restart'

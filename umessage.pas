@@ -10,9 +10,9 @@ uses
 
 type
 
-  { TMessageForm }
+  { TfMessage }
 
-  TMessageForm = class(TForm)
+  TfMessage = class(TForm)
     buCancel: TButton;
     buLaunch: TButton;
     Label1: TLabel;
@@ -23,6 +23,7 @@ type
     Timer1: TTimer;
     procedure buCancelClick(Sender: TObject);
     procedure buLaunchClick(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
   private
 
@@ -32,29 +33,37 @@ type
   end;
 
 var
-  MessageForm: TMessageForm;
+  fMessage: TfMessage;
 
 implementation
 
 {$R *.lfm}
 
-{ TMessageForm }
+uses uMain;
 
-procedure TMessageForm.buCancelClick(Sender: TObject);
+  { TfMessage }
+
+procedure TfMessage.buCancelClick(Sender: TObject);
 begin
   Timer1.Enabled := False;
   LaunchAlarm := 0;
   Close;
 end;
 
-procedure TMessageForm.buLaunchClick(Sender: TObject);
+procedure TfMessage.buLaunchClick(Sender: TObject);
 begin
   Timer1.Enabled := False;
   LaunchAlarm := 1;
   Close;
 end;
 
-procedure TMessageForm.Timer1Timer(Sender: TObject);
+procedure TfMessage.FormActivate(Sender: TObject);
+begin
+  if fMain.chBuzz.Checked then
+    BuzzForm(fMessage);
+end;
+
+procedure TfMessage.Timer1Timer(Sender: TObject);
 begin
   LaunchAlarm := 1;
   Interval := Interval - Timer1.Interval;
@@ -62,7 +71,7 @@ begin
   begin
     Timer1.Enabled := True;
     LaunchAlarm := 1;
-    MessageForm.Close;
+    fMessage.Close;
   end;
   Label2.Caption := 'Launch file in ' + IntToStr(Interval div 1000) + ' seconds';
 end;
