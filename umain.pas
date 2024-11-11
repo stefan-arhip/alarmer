@@ -14,6 +14,7 @@ type
   { TfMain }
 
   TfMain = class(TForm)
+    chSetEnabledAfterEdit: TCheckBox;
     chSound: TCheckBox;
     chTaskbarIcon: TCheckBox;
     chBuzz: TCheckBox;
@@ -60,10 +61,10 @@ type
     Shape1: TShape;
     chTaskbarShorttime: TCheckBox;
     chConfirmation: TCheckBox;
-    Con: TSQLite3Connection;
+    con: TSQLite3Connection;
     seHoursIncrement: TSpinEdit;
     sql: TSQLQuery;
-    Tr: TSQLTransaction;
+    tr: TSQLTransaction;
     sbMain: TStatusBar;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
@@ -88,7 +89,6 @@ type
     procedure lvAlarmsAdvancedCustomDrawItem(Sender: TCustomListView;
       Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage;
       var DefaultDraw: boolean);
-    procedure lvAlarmsDblClick(Sender: TObject);
     procedure lvAlarmsSelectItem(Sender: TObject; Item: TListItem;
       Selected: boolean);
     procedure miAddHoursClick(Sender: TObject);
@@ -236,7 +236,7 @@ end;
 
 function GetUserFromWindows: string;
 var
-  UserName: string;
+  UserName: string = '';
   UserNameLen: dWord;
 begin
   UserNameLen := 255;
@@ -271,7 +271,7 @@ var
   s, strExeVersion, AppDir: string;
 begin
   AppDir := IncludeTrailingPathDelimiter(ExtractFileDir(ParamStr(0)));
-  Con.DatabaseName := AppDir + 'alarmer.sqlite';
+  con.DatabaseName := AppDir + 'alarmer.sqlite';
   IniPropStorage1.IniFileName := AppDir + 'alarmer.ini';
 
   try
@@ -281,7 +281,7 @@ begin
     {$IFDEF Win64}
     sqlite3conn.SQLiteLibraryName := AppDir + 'x64-sqlite3.dll';
     {$ENDIF}
-    Con.Connected := True;
+    con.Connected := True;
   except
     {$IfDef Windows}
     MessageDlg('Library sqlite3.dll not found!', mtError, [mbOK], 0);
@@ -346,7 +346,7 @@ begin
   //sql.ParamByName('Now').AsDateTime := Now();
   sql.SQL.Add('Delete From Usage;');
   sql.ExecSQL;
-  Tr.Commit;
+  tr.Commit;
 
   sql.Close;
   sql.SQL.Clear;
@@ -355,7 +355,7 @@ begin
   sql.ParamByName('Now').AsDateTime := Now();
   sql.ParamByName('Computer').AsString := CurrentComputer;
   sql.ExecSQL;
-  Tr.Commit;
+  tr.Commit;
 
   sql.Close;
   sql.SQL.Clear;
@@ -417,7 +417,7 @@ begin
     sql.ParamByName('StopTime').AsDateTime := StopTime;
     sql.ParamByName('Message').AsString := fNew.meMessage.Text;
     sql.ExecSQL;
-    Tr.Commit;
+    tr.Commit;
     sql.Close;
 
     sql.Close;
@@ -483,51 +483,6 @@ begin
   tbMain.Visible := chToolbar.Checked;
 end;
 
-procedure TfMain.lvAlarmsDblClick(Sender: TObject);
-var
-  StartTime, StopTime: TDateTime;
-  Interval, H, N, S: integer;
-begin
-  if lvAlarms.Selected = nil then
-    Exit;
-  fNew.Caption := 'Edit alarm';
-  fNew.Timer1.Enabled := False;
-  fNew.edStartTime.Text := lvAlarms.Selected.SubItems[1];
-  Interval := StrToInt(lvAlarms.Selected.SubItems[3]);
-  H := Interval div 60 div 60;
-  N := (Interval - H * 60 * 60) div 60;
-  S := (Interval - H * 60 * 60 - N * 60);
-  fNew.seHours.Value := H;
-  fNew.seMinutes.Value := N;
-  fNew.seSeconds.Value := S;
-  fNew.meMessage.Text := lvAlarms.Selected.SubItems[5];
-  fNew.seHoursChange(Sender);
-  if fNew.Execute then
-    with lvAlarms.Selected do
-    begin
-      StartTime := ScanDateTime('yyyy-mm-dd hh:nn:ss', fNew.edStartTime.Text);
-      Interval := fNew.seHours.Value * 60 * 60 + fNew.seMinutes.Value *
-        60 + fNew.seSeconds.Value;
-      StopTime := IncSecond(StartTime, Interval);
-      SubItems[1] := FormatDateTime('yyyy-mm-dd hh:nn:ss', StartTime);
-      SubItems[2] := FormatDateTime('yyyy-mm-dd hh:nn:ss', StopTime);
-      SubItems[3] := IntToStr(Round(Interval));
-      SubItems[4] := SecondsToTimeHMS(Interval, False);
-      SubItems[5] := fNew.meMessage.Text;
-
-      sql.Close;
-      sql.SQL.Clear;
-      sql.SQL.Add(
-        'Update Events Set StopTime=:StopTime,Message=:Message Where Id=:Id');
-      sql.ParamByName('StopTime').AsDateTime := StopTime;
-      sql.ParamByName('Message').AsString := fNew.meMessage.Text;
-      sql.ParamByName('Id').AsInteger := fMain.lvAlarms.Selected.ImageIndex;
-      sql.ExecSQL;
-      Tr.Commit;
-      sql.Close;
-    end;
-end;
-
 procedure TfMain.lvAlarmsSelectItem(Sender: TObject; Item: TListItem;
   Selected: boolean);
 begin
@@ -559,6 +514,7 @@ begin
     S := (Interval - H * 60 * 60 - N * 60);
     Interval := (H + seHoursIncrement.Value) * 60 * 60 + N * 60 + S;
     StopTime := IncSecond(StartTime, Interval);
+
     SubItems[1] := FormatDateTime('yyyy-mm-dd hh:nn:ss', StartTime);
     SubItems[2] := FormatDateTime('yyyy-mm-dd hh:nn:ss', StopTime);
     SubItems[3] := IntToStr(Round(Interval));
@@ -567,12 +523,20 @@ begin
 
     sql.Close;
     sql.SQL.Clear;
-    sql.SQL.Add('Update Events Set StopTime=:StopTime Where Id=:Id');
+    sql.SQL.Add('Update Events Set');
+    if chSetEnabledAfterEdit.Checked then
+    begin
+      SubItems[0] := 'Yes';
+      sql.SQL.Add('Active=:Active,');
+      sql.ParamByName('Active').AsBoolean := True;
+    end;
+    sql.SQL.Add('StopTime=:StopTime Where Id=:Id');
     sql.ParamByName('StopTime').AsDateTime := StopTime;
     sql.ParamByName('Id').AsInteger := fMain.lvAlarms.Selected.ImageIndex;
     sql.ExecSQL;
-    Tr.Commit;
+    tr.Commit;
     sql.Close;
+    Timer1Timer(Sender);
   end;
 end;
 
@@ -590,7 +554,7 @@ begin
   sql.ParamByName('Computer').AsString := CurrentComputer;
   //GetEnvironmentVariable('Computername');
   sql.ExecSQL;
-  Tr.Commit;
+  tr.Commit;
   sql.Close;
 
   Application.Terminate;
@@ -621,12 +585,20 @@ begin
 
       sql.Close;
       sql.SQL.Clear;
-      sql.SQL.Add('Update Events Set StopTime=:StopTime Where Id=:Id');
+      sql.SQL.Add('Update Events Set');
+      if chSetEnabledAfterEdit.Checked then
+      begin
+        SubItems[0] := 'Yes';
+        sql.SQL.Add('Active=:Active,');
+        sql.ParamByName('Active').AsBoolean := True;
+      end;
+      sql.SQL.Add('StopTime=:StopTime Where Id=:Id');
       sql.ParamByName('StopTime').AsDateTime := StopTime;
       sql.ParamByName('Id').AsInteger := fMain.lvAlarms.Selected.ImageIndex;
       sql.ExecSQL;
-      Tr.Commit;
+      tr.Commit;
       sql.Close;
+      Timer1Timer(Sender);
     end;
   end;
 end;
@@ -684,6 +656,7 @@ begin
       Interval := fNew.seHours.Value * 60 * 60 + fNew.seMinutes.Value *
         60 + fNew.seSeconds.Value;
       StopTime := IncSecond(StartTime, Interval);
+
       SubItems[1] := FormatDateTime('yyyy-mm-dd hh:nn:ss', StartTime);
       SubItems[2] := FormatDateTime('yyyy-mm-dd hh:nn:ss', StopTime);
       SubItems[3] := IntToStr(Round(Interval));
@@ -692,14 +665,21 @@ begin
 
       sql.Close;
       sql.SQL.Clear;
-      sql.SQL.Add(
-        'Update Events Set StopTime=:StopTime,Message=:Message Where Id=:Id');
+      sql.SQL.Add('Update Events Set');
+      if chSetEnabledAfterEdit.Checked then
+      begin
+        SubItems[0] := 'Yes';
+        sql.SQL.Add('Active=:Active,');
+        sql.ParamByName('Active').AsBoolean := True;
+      end;
+      sql.SQL.Add('StopTime=:StopTime,Message=:Message Where Id=:Id');
       sql.ParamByName('StopTime').AsDateTime := StopTime;
       sql.ParamByName('Message').AsString := fNew.meMessage.Text;
       sql.ParamByName('Id').AsInteger := fMain.lvAlarms.Selected.ImageIndex;
       sql.ExecSQL;
-      Tr.Commit;
+      tr.Commit;
       sql.Close;
+      Timer1Timer(Sender);
     end;
 end;
 
@@ -718,7 +698,7 @@ begin
       sql.ParamByName('Active').AsBoolean := True;
       sql.ParamByName('Id').AsInteger := lvAlarms.Selected.ImageIndex;
       sql.ExecSQL;
-      Tr.Commit;
+      tr.Commit;
       sql.Close;
     end
     else
@@ -733,7 +713,7 @@ begin
       sql.ParamByName('Active').AsBoolean := False;
       sql.ParamByName('Id').AsInteger := lvAlarms.Selected.ImageIndex;
       sql.ExecSQL;
-      Tr.Commit;
+      tr.Commit;
       sql.Close;
     end;
 end;
@@ -747,7 +727,7 @@ begin
     sql.SQL.Clear;
     sql.SQL.Add('Delete From Events Where Active=0;');
     sql.ExecSQL;
-    Tr.Commit;
+    tr.Commit;
     sql.Close;
   end;
 end;
@@ -765,7 +745,7 @@ begin
     sql.SQL.Add('Delete From Events Where Id=:Id');
     sql.ParamByName('Id').AsInteger := lvAlarms.Selected.ImageIndex;
     sql.ExecSQL;
-    Tr.Commit;
+    tr.Commit;
     sql.Close;
 
     lvAlarms.Selected.Delete;
@@ -812,8 +792,9 @@ begin
     sql.ParamByName('StopTime').AsDateTime := StopTime;
     sql.ParamByName('Id').AsInteger := lvAlarms.Selected.ImageIndex;
     sql.ExecSQL;
-    Tr.Commit;
+    tr.Commit;
     sql.Close;
+    Timer1Timer(Sender);
   end;
 end;
 
@@ -832,7 +813,7 @@ begin
         sql.SQL.Add('Update Events Set Active=0 Where Id=:Id;');
         sql.ParamByName('Id').AsInteger := lvAlarms.Selected.ImageIndex;
         sql.ExecSQL;
-        Tr.Commit;
+        tr.Commit;
         sql.Close;
       end;
       1:
@@ -882,7 +863,7 @@ begin
               sql.SQL.Add('Update Events Set Active=0 Where Id=:Id;');
               sql.ParamByName('Id').AsInteger := lvAlarms.Items[i - 1].ImageIndex;
               sql.ExecSQL;
-              Tr.Commit;
+              tr.Commit;
               sql.Close;
             end;
             1:

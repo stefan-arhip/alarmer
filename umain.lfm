@@ -6,7 +6,7 @@ object fMain: TfMain
   Caption = 'Alarmer'
   ClientHeight = 401
   ClientWidth = 741
-  SessionProperties = 'chBuzz.Checked;chConfirmation.Checked;chFileOpen.Checked;chIcons.Checked;chMessageTime.Checked;chSound.Checked;chTaskbarIcon.Checked;chTaskbarIconAlarm.Checked;chTaskbarMessage.Checked;chTaskbarShorttime.Checked;chTaskbarTime.Checked;chToolbar.Checked;edFileOpen.Text;Height;Left;lvAlarms.Columns;seMessageTime.Value;Top;Width;seHoursIncrement.Value'
+  SessionProperties = 'chBuzz.Checked;chConfirmation.Checked;chFileOpen.Checked;chIcons.Checked;chMessageTime.Checked;chSound.Checked;chTaskbarIcon.Checked;chTaskbarIconAlarm.Checked;chTaskbarMessage.Checked;chTaskbarShorttime.Checked;chTaskbarTime.Checked;chToolbar.Checked;edFileOpen.Text;Height;Left;lvAlarms.Columns;seHoursIncrement.Value;seMessageTime.Value;Top;Width;chSetEnabledAfterInc.Checked'
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnShow = FormShow
@@ -15,9 +15,9 @@ object fMain: TfMain
     Height = 378
     Top = 0
     Width = 741
-    ActivePage = TabSheet2
+    ActivePage = TabSheet1
     Align = alClient
-    TabIndex = 1
+    TabIndex = 0
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'ALARMS'
@@ -71,7 +71,7 @@ object fMain: TfMain
         TabOrder = 0
         ViewStyle = vsReport
         OnAdvancedCustomDrawItem = lvAlarmsAdvancedCustomDrawItem
-        OnDblClick = lvAlarmsDblClick
+        OnDblClick = tbEditClick
         OnSelectItem = lvAlarmsSelectItem
       end
       object tbMain: TToolBar
@@ -314,6 +314,16 @@ object fMain: TfMain
         TabOrder = 15
         Value = 12
       end
+      object chSetEnabledAfterEdit: TCheckBox
+        Left = 12
+        Height = 19
+        Top = 268
+        Width = 162
+        Caption = 'Set alarm enabled after edit'
+        Checked = True
+        State = cbChecked
+        TabOrder = 16
+      end
     end
     object TabSheet3: TTabSheet
       Caption = 'HELP'
@@ -486,27 +496,27 @@ object fMain: TfMain
     Left = 672
     Top = 120
   end
-  object Con: TSQLite3Connection
+  object con: TSQLite3Connection
     Connected = False
     LoginPrompt = False
     KeepConnection = False
-    Transaction = Tr
+    Transaction = tr
     LogEvents = []
     AlwaysUseBigint = False
     Left = 672
     Top = 176
   end
-  object Tr: TSQLTransaction
+  object tr: TSQLTransaction
     Active = False
     Action = caNone
-    Database = Con
+    Database = con
     Left = 672
     Top = 232
   end
   object sql: TSQLQuery
     FieldDefs = <>
-    Database = Con
-    Transaction = Tr
+    Database = con
+    Transaction = tr
     Params = <>
     Macros = <>
     Left = 672
