@@ -2,6 +2,6 @@ backup/
 lib/
 TEMP/
 *.exe
-*.gdb
+*.dbg
 *.txt
 upx
